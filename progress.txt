@@ -130,3 +130,16 @@ AI News Aggregator & Newsletter Platform - Curated AI news from top newsletters 
   - digest_batch_id can be used to group articles sent in the same digest email
 ---
 
+## 2026-02-11 - US-008
+- **Implemented:** Create system_config table schema
+- **Files created:**
+  - supabase/migrations/20260211000006_create_system_config_table.sql
+- **Schema details:**
+  - Table columns: key (TEXT PK), value (JSONB), updated_at (TIMESTAMPTZ)
+  - Uses simple key-value structure for flexible configuration storage
+  - Reuses update_updated_at_column() trigger function for auto-updating updated_at
+- **Learnings for future iterations:**
+  - system_config table uses TEXT primary key directly (no separate UUID id column) since keys are natural primary keys
+  - JSONB type allows storing complex configuration values with query capability
+---
+
