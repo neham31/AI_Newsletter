@@ -197,3 +197,19 @@ AI News Aggregator & Newsletter Platform - Curated AI news from top newsletters 
   - system_config uses `key` as primary key, so conflict resolution is on (key)
 ---
 
+## 2026-02-11 - US-013
+- **Implemented:** Create TypeScript types for database schema
+- **Files created:**
+  - src/types/database.ts
+- **Type details:**
+  - Enum types: SourceType, Frequency, IngestionType
+  - Table interfaces: Source, Article, User, UserSubscription, UserArticleLog, SystemConfig, Waitlist, IngestionLog
+  - Insert types: *Insert variants for creating new records (with optional auto-generated fields)
+  - Update types: *Update variants for partial updates
+- **Learnings for future iterations:**
+  - TypeScript types go in `src/types/` directory
+  - Use string type for UUID fields (database returns them as strings via JSON)
+  - Use string type for TIMESTAMPTZ fields (database returns ISO date strings via JSON)
+  - Provide Insert and Update type variants for flexibility when creating/updating records
+---
+
