@@ -12,6 +12,33 @@ AI News Aggregator & Newsletter Platform - Curated AI news from top newsletters 
 - Email Ingestion: Mailgun Inbound Routing
 - Hosting: Vercel
 
+## Codebase Patterns
+- Project uses src/ directory structure with App Router
+- TypeScript strict mode enabled
+- Tailwind CSS for styling
+- Inter font as default
+
 ## Learnings
 (Ralph will append learnings here after each iteration)
+
+---
+
+## 2026-02-11 - US-001
+- **Implemented:** Initialize Next.js 14 project with Tailwind CSS
+- **Files created:**
+  - package.json (Next.js 14.2.21, React 18, TypeScript, Tailwind)
+  - tsconfig.json (strict mode, bundler module resolution, @/* path alias)
+  - tailwind.config.ts (configured for src/ directory)
+  - postcss.config.mjs (autoprefixer + tailwindcss)
+  - next.config.mjs (basic Next.js config)
+  - .eslintrc.json (next/core-web-vitals)
+  - .gitignore (standard Next.js ignores)
+  - src/app/layout.tsx (Inter font, basic metadata)
+  - src/app/page.tsx (placeholder landing page)
+  - src/app/globals.css (Tailwind directives)
+- **Learnings for future iterations:**
+  - npm project names cannot contain capital letters - use lowercase with hyphens
+  - Dev server confirmed working on port 3000
+  - Typecheck passes with `npm run typecheck`
+---
 
