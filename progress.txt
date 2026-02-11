@@ -22,6 +22,7 @@ AI News Aggregator & Newsletter Platform - Curated AI news from top newsletters 
 - Migrations: `supabase/migrations/YYYYMMDDHHMMSS_description.sql` format
 - Use `IF NOT EXISTS` for tables/indexes to make migrations idempotent
 - Reuse `update_updated_at_column()` trigger function for updated_at columns
+- UI components go in `src/components/ui/` directory with `'use client'` directive
 
 ## Learnings
 (Ralph will append learnings here after each iteration)
@@ -233,5 +234,24 @@ AI News Aggregator & Newsletter Platform - Curated AI news from top newsletters 
   - Custom colors in Tailwind go in `theme.extend.colors` object
   - Use hyphenated names for multi-word colors (e.g., `lavender-hover` becomes `bg-lavender-hover` in Tailwind classes)
   - Color values can be used with any Tailwind utility: bg-*, text-*, border-*, etc.
+---
+
+## 2026-02-11 - US-015
+- **Implemented:** Create reusable Button component
+- **Files created:**
+  - src/components/ui/Button.tsx
+- **Component features:**
+  - Primary variant: lavender background, white text, lavender-hover on hover
+  - Secondary variant: white background, charcoal text, border-gray border
+  - Loading state with animated SVG spinner
+  - Disabled state with reduced opacity and cursor-not-allowed
+  - 8px border-radius (rounded-lg), 12px 24px padding (py-3 px-6)
+  - Focus ring styling for accessibility
+  - forwardRef for ref forwarding support
+- **Learnings for future iterations:**
+  - UI components go in `src/components/ui/` directory
+  - Use `forwardRef` for components that need to forward refs to underlying DOM elements
+  - Set `displayName` on forwardRef components for better debugging in React DevTools
+  - `'use client'` directive needed for components using client-side features (event handlers, refs)
 ---
 
