@@ -213,3 +213,25 @@ AI News Aggregator & Newsletter Platform - Curated AI news from top newsletters 
   - Provide Insert and Update type variants for flexibility when creating/updating records
 ---
 
+## 2026-02-11 - US-014
+- **Implemented:** Create design system color constants
+- **Files changed:**
+  - tailwind.config.ts (added custom colors in theme.extend.colors)
+- **Color palette:**
+  - cream: #FAFAF7 (background)
+  - lavender: #B8A9E8 (primary accent)
+  - lavender-hover: #9B87D6 (primary hover state)
+  - mint: #A8D8C8 (secondary accent)
+  - peach: #F5C5A3 (tertiary accent)
+  - charcoal: #2D2D2D (primary text)
+  - warm-gray: #6B6B6B (secondary text)
+  - light-gray: #9B9B9B (muted text)
+  - border-gray: #E8E8E4 (borders)
+  - error-rose: #E8A0A0 (error states)
+  - success-green: #A0D8B8 (success states)
+- **Learnings for future iterations:**
+  - Custom colors in Tailwind go in `theme.extend.colors` object
+  - Use hyphenated names for multi-word colors (e.g., `lavender-hover` becomes `bg-lavender-hover` in Tailwind classes)
+  - Color values can be used with any Tailwind utility: bg-*, text-*, border-*, etc.
+---
+
