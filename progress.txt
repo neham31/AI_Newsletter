@@ -90,3 +90,17 @@ AI News Aggregator & Newsletter Platform - Curated AI news from top newsletters 
   - url_hash unique index enables efficient deduplication of articles
 ---
 
+## 2026-02-11 - US-005
+- **Implemented:** Create users table schema
+- **Files created:**
+  - supabase/migrations/20260211000003_create_users_table.sql
+- **Schema details:**
+  - Created `email_frequency` enum with values: 'daily', 'weekly'
+  - Table columns: id (UUID PK), email (text unique), email_verified (default false), verification_token, unsubscribe_token (unique), frequency (email_frequency enum default 'daily'), is_active (default true), signed_up_at, last_email_sent_at, created_at
+  - Indexes: idx_users_email, idx_users_active_frequency (partial index WHERE is_active=true), idx_users_unsubscribe_token (partial index WHERE NOT NULL)
+- **Learnings for future iterations:**
+  - Partial indexes (with WHERE clause) can optimize specific query patterns
+  - `idx_users_active_frequency` uses partial index to only index active users, optimizing digest batch queries
+  - `idx_users_unsubscribe_token` uses partial index to skip NULL values, as most lookups only need non-null tokens
+---
+
