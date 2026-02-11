@@ -117,3 +117,16 @@ AI News Aggregator & Newsletter Platform - Curated AI news from top newsletters 
   - Named constraint (`user_subscriptions_user_source_unique`) makes debugging easier than auto-generated names
 ---
 
+## 2026-02-11 - US-007
+- **Implemented:** Create user_article_log table schema
+- **Files created:**
+  - supabase/migrations/20260211000005_create_user_article_log_table.sql
+- **Schema details:**
+  - Table columns: id (UUID PK), user_id (FK to users with ON DELETE CASCADE), article_id (FK to articles), sent_at, digest_batch_id
+  - Unique constraint on (user_id, article_id) to prevent sending same article twice
+  - Indexes: idx_ual_user_article (for dedup checks), idx_ual_user_sent (for querying sent history)
+- **Learnings for future iterations:**
+  - The user_article_log table is critical for deduplication - prevents sending the same article to a user multiple times
+  - digest_batch_id can be used to group articles sent in the same digest email
+---
+
