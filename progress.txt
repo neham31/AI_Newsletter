@@ -255,3 +255,20 @@ AI News Aggregator & Newsletter Platform - Curated AI news from top newsletters 
   - `'use client'` directive needed for components using client-side features (event handlers, refs)
 ---
 
+## 2026-02-11 - US-016
+- **Implemented:** Create reusable Input component
+- **Files created:**
+  - src/components/ui/Input.tsx
+- **Component features:**
+  - White background with border-gray border
+  - Charcoal text color with light-gray placeholder
+  - Lavender focus ring and border on focus
+  - Error state with error-rose border and focus ring
+  - forwardRef for ref forwarding support
+  - Consistent styling with Button component (rounded-lg, px-4 py-3)
+- **Learnings for future iterations:**
+  - Input components follow same pattern as Button: forwardRef, displayName, 'use client'
+  - Use `error` prop (boolean) to toggle error state styling
+  - Transition-colors for smooth state changes on focus/hover
+---
+
