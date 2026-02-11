@@ -272,3 +272,21 @@ AI News Aggregator & Newsletter Platform - Curated AI news from top newsletters 
   - Transition-colors for smooth state changes on focus/hover
 ---
 
+## 2026-02-11 - US-017
+- **Implemented:** Create SourceCard component
+- **Files created:**
+  - src/components/SourceCard.tsx
+- **Component features:**
+  - Displays source name, description, reach, audience
+  - Custom checkbox that toggles selected state
+  - Selected state: lavender left border (3px), faint lavender background (8% opacity via bg-lavender/[0.08])
+  - Hover state: elevated shadow (hover:shadow-md)
+  - Keyboard accessible with Enter/Space support
+  - Uses role="checkbox" and aria-checked for accessibility
+- **Learnings for future iterations:**
+  - Non-UI components (page-specific components) go in `src/components/` (not `src/components/ui/`)
+  - Use Tailwind arbitrary values for precise opacity: `bg-lavender/[0.08]` for 8% opacity
+  - Use mixed borders with `border-l-[3px]` for specific side border width
+  - line-clamp-2 utility truncates text to 2 lines with ellipsis
+---
+
