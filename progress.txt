@@ -1,0 +1,17 @@
+# Ralph Progress Log - AI News Aggregator
+
+## Project Overview
+AI News Aggregator & Newsletter Platform - Curated AI news from top newsletters and blogs, deduplicated and delivered as personalized email digests.
+
+## Tech Stack
+- Frontend: Next.js 14 (App Router) + Tailwind CSS
+- Backend: Next.js API Routes
+- Database: Supabase (PostgreSQL)
+- Email Delivery: Resend + React Email
+- AI Processing: Claude API (content extraction)
+- Email Ingestion: Mailgun Inbound Routing
+- Hosting: Vercel
+
+## Learnings
+(Ralph will append learnings here after each iteration)
+
