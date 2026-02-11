@@ -184,3 +184,16 @@ AI News Aggregator & Newsletter Platform - Curated AI news from top newsletters 
   - RSS feed URLs for major AI labs: openai.com/blog/rss.xml, anthropic.com/rss.xml, deepmind.google/blog/rss.xml
 ---
 
+## 2026-02-11 - US-012
+- **Implemented:** Seed system_config with initial settings
+- **Files created:**
+  - supabase/migrations/20260211000010_seed_system_config.sql
+- **Seed details:**
+  - `max_subscribers`: `{"limit": 3000, "enabled": true}`
+  - `subscriptions_paused`: `{"paused": false, "message": "We've hit capacity! Join the waitlist."}`
+  - Uses `ON CONFLICT DO UPDATE` pattern for idempotent seeding
+- **Learnings for future iterations:**
+  - JSONB values can be cast inline with `::jsonb` (e.g., `'{"key": "value"}'::jsonb`)
+  - system_config uses `key` as primary key, so conflict resolution is on (key)
+---
+
