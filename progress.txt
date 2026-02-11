@@ -19,6 +19,9 @@ AI News Aggregator & Newsletter Platform - Curated AI news from top newsletters 
 - Inter font as default
 - Supabase clients: use `createClient()` from `@/lib/supabase/client` for browser, `@/lib/supabase/server` for server-side
 - Use `createServiceRoleClient()` for admin operations that bypass RLS
+- Migrations: `supabase/migrations/YYYYMMDDHHMMSS_description.sql` format
+- Use `IF NOT EXISTS` for tables/indexes to make migrations idempotent
+- Reuse `update_updated_at_column()` trigger function for updated_at columns
 
 ## Learnings
 (Ralph will append learnings here after each iteration)
@@ -56,5 +59,21 @@ AI News Aggregator & Newsletter Platform - Curated AI news from top newsletters 
   - Browser client: createBrowserClient from @supabase/ssr
   - Server client needs cookie handling for session management
   - Service role client bypasses RLS - use only in secure server contexts
+---
+
+## 2026-02-11 - US-003
+- **Implemented:** Create sources table schema
+- **Files created:**
+  - supabase/migrations/20260211000001_create_sources_table.sql
+- **Schema details:**
+  - Created `source_type` enum with values: 'newsletter', 'blog'
+  - Table columns: id (UUID PK), name (text unique), slug (text unique), type (source_type enum), description, audience, reach, feed_url, intake_email, icon_url, is_active (default true), created_at, updated_at
+  - Indexes on slug and is_active
+  - Trigger for auto-updating updated_at column
+- **Learnings for future iterations:**
+  - Supabase migrations go in `supabase/migrations/` directory
+  - Use timestamp prefix for migration files (YYYYMMDDHHMMSS format)
+  - Use `IF NOT EXISTS` for safe re-runnable migrations
+  - `update_updated_at_column()` trigger function can be reused across tables
 ---
 
