@@ -143,3 +143,15 @@ AI News Aggregator & Newsletter Platform - Curated AI news from top newsletters 
   - JSONB type allows storing complex configuration values with query capability
 ---
 
+## 2026-02-11 - US-009
+- **Implemented:** Create waitlist table schema
+- **Files created:**
+  - supabase/migrations/20260211000007_create_waitlist_table.sql
+- **Schema details:**
+  - Table columns: id (UUID PK), email (TEXT UNIQUE), created_at (TIMESTAMPTZ)
+  - Indexes: idx_waitlist_email (for email lookups), idx_waitlist_created_at (for position ordering)
+- **Learnings for future iterations:**
+  - Waitlist table is simpler than users table - just email and timestamp, no tokens needed
+  - created_at index enables efficient calculation of waitlist position
+---
+
