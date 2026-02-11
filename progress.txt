@@ -104,3 +104,16 @@ AI News Aggregator & Newsletter Platform - Curated AI news from top newsletters 
   - `idx_users_unsubscribe_token` uses partial index to skip NULL values, as most lookups only need non-null tokens
 ---
 
+## 2026-02-11 - US-006
+- **Implemented:** Create user_subscriptions table schema
+- **Files created:**
+  - supabase/migrations/20260211000004_create_user_subscriptions_table.sql
+- **Schema details:**
+  - Table columns: id (UUID PK), user_id (FK to users with ON DELETE CASCADE), source_id (FK to sources), created_at
+  - Unique constraint on (user_id, source_id) to prevent duplicate subscriptions
+  - Indexes on user_id and source_id for efficient lookups
+- **Learnings for future iterations:**
+  - ON DELETE CASCADE ensures subscriptions are cleaned up when a user is deleted
+  - Named constraint (`user_subscriptions_user_source_unique`) makes debugging easier than auto-generated names
+---
+
