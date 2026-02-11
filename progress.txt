@@ -77,3 +77,16 @@ AI News Aggregator & Newsletter Platform - Curated AI news from top newsletters 
   - `update_updated_at_column()` trigger function can be reused across tables
 ---
 
+## 2026-02-11 - US-004
+- **Implemented:** Create articles table schema
+- **Files created:**
+  - supabase/migrations/20260211000002_create_articles_table.sql
+- **Schema details:**
+  - Table columns: id (UUID PK), source_id (FK to sources), headline, summary, url, url_hash, tags (text array), image_url, published_at, ingested_at, raw_email_id, extraction_confidence (float default 1.0)
+  - Indexes: idx_articles_url_hash (unique), idx_articles_source_published, idx_articles_published, idx_articles_tags (GIN)
+- **Learnings for future iterations:**
+  - Use GIN index for array columns (like tags) to enable efficient array search
+  - DESC ordering in indexes (e.g., published_at DESC) optimizes common "latest first" queries
+  - url_hash unique index enables efficient deduplication of articles
+---
+
