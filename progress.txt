@@ -17,6 +17,8 @@ AI News Aggregator & Newsletter Platform - Curated AI news from top newsletters 
 - TypeScript strict mode enabled
 - Tailwind CSS for styling
 - Inter font as default
+- Supabase clients: use `createClient()` from `@/lib/supabase/client` for browser, `@/lib/supabase/server` for server-side
+- Use `createServiceRoleClient()` for admin operations that bypass RLS
 
 ## Learnings
 (Ralph will append learnings here after each iteration)
@@ -40,5 +42,19 @@ AI News Aggregator & Newsletter Platform - Curated AI news from top newsletters 
   - npm project names cannot contain capital letters - use lowercase with hyphens
   - Dev server confirmed working on port 3000
   - Typecheck passes with `npm run typecheck`
+---
+
+## 2026-02-11 - US-002
+- **Implemented:** Set up Supabase client configuration
+- **Files changed:**
+  - package.json (added @supabase/supabase-js and @supabase/ssr)
+  - src/lib/supabase/client.ts (browser client using createBrowserClient)
+  - src/lib/supabase/server.ts (server client with cookie handling + service role client)
+  - .env.example (Supabase environment variables)
+- **Learnings for future iterations:**
+  - Use @supabase/ssr package for Next.js App Router compatibility
+  - Browser client: createBrowserClient from @supabase/ssr
+  - Server client needs cookie handling for session management
+  - Service role client bypasses RLS - use only in secure server contexts
 ---
 
