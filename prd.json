@@ -1,0 +1,961 @@
+{
+  "project": "AI News Aggregator",
+  "branchName": "ralph/ai-news-aggregator-mvp",
+  "description": "AI News Aggregator & Newsletter Platform - Curated AI news from top newsletters and blogs, deduplicated and delivered as personalized email digests",
+  "userStories": [
+    {
+      "id": "US-001",
+      "title": "Initialize Next.js 14 project with Tailwind CSS",
+      "description": "As a developer, I need a Next.js 14 App Router project with Tailwind CSS configured so I can build the application.",
+      "acceptanceCriteria": [
+        "Next.js 14 project created with App Router",
+        "Tailwind CSS installed and configured",
+        "Inter font configured as the default font",
+        "Basic layout.tsx and page.tsx exist",
+        "Dev server runs without errors",
+        "Typecheck passes"
+      ],
+      "priority": 1,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-002",
+      "title": "Set up Supabase client configuration",
+      "description": "As a developer, I need Supabase client configured so I can interact with the database.",
+      "acceptanceCriteria": [
+        "Install @supabase/supabase-js package",
+        "Create lib/supabase/client.ts for browser client",
+        "Create lib/supabase/server.ts for server-side client",
+        "Environment variables documented in .env.example",
+        "Typecheck passes"
+      ],
+      "priority": 2,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-003",
+      "title": "Create sources table schema",
+      "description": "As a developer, I need the sources table to store newsletter and blog source metadata.",
+      "acceptanceCriteria": [
+        "Create SQL migration for sources table with columns: id (uuid PK), name (text unique), slug (text unique), type (enum newsletter/blog), description, audience, reach, feed_url, intake_email, icon_url, is_active (default true), created_at, updated_at",
+        "Migration file created in supabase/migrations/",
+        "Typecheck passes"
+      ],
+      "priority": 3,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-004",
+      "title": "Create articles table schema",
+      "description": "As a developer, I need the articles table to store extracted news content.",
+      "acceptanceCriteria": [
+        "Create SQL migration for articles table with columns: id (uuid PK), source_id (FK to sources), headline, summary, url, url_hash (unique), tags (text array), image_url, published_at, ingested_at, raw_email_id, extraction_confidence (float default 1.0)",
+        "Create indexes: idx_articles_url_hash (unique), idx_articles_source_published, idx_articles_published, idx_articles_tags (GIN)",
+        "Typecheck passes"
+      ],
+      "priority": 4,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-005",
+      "title": "Create users table schema",
+      "description": "As a developer, I need the users table to store subscriber information.",
+      "acceptanceCriteria": [
+        "Create SQL migration for users table with columns: id (uuid PK), email (unique), email_verified (default false), verification_token, unsubscribe_token (unique), frequency (enum daily/weekly), is_active (default true), signed_up_at, last_email_sent_at, created_at",
+        "Create indexes: idx_users_email, idx_users_active_frequency, idx_users_unsubscribe_token",
+        "Typecheck passes"
+      ],
+      "priority": 5,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-006",
+      "title": "Create user_subscriptions table schema",
+      "description": "As a developer, I need the user_subscriptions table to track which sources each user subscribes to.",
+      "acceptanceCriteria": [
+        "Create SQL migration for user_subscriptions table with columns: id (uuid PK), user_id (FK to users with ON DELETE CASCADE), source_id (FK to sources), created_at",
+        "Add unique constraint on (user_id, source_id)",
+        "Typecheck passes"
+      ],
+      "priority": 6,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-007",
+      "title": "Create user_article_log table schema",
+      "description": "As a developer, I need the user_article_log table to track which articles have been sent to each user.",
+      "acceptanceCriteria": [
+        "Create SQL migration for user_article_log table with columns: id (uuid PK), user_id (FK to users with ON DELETE CASCADE), article_id (FK to articles), sent_at, digest_batch_id",
+        "Add unique constraint on (user_id, article_id)",
+        "Create indexes: idx_ual_user_article, idx_ual_user_sent",
+        "Typecheck passes"
+      ],
+      "priority": 7,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-008",
+      "title": "Create system_config table schema",
+      "description": "As a developer, I need the system_config table to store application settings like subscriber cap.",
+      "acceptanceCriteria": [
+        "Create SQL migration for system_config table with columns: key (text PK), value (jsonb), updated_at",
+        "Typecheck passes"
+      ],
+      "priority": 8,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-009",
+      "title": "Create waitlist table schema",
+      "description": "As a developer, I need the waitlist table to store emails when subscriber cap is reached.",
+      "acceptanceCriteria": [
+        "Create SQL migration for waitlist table with columns: id (uuid PK), email (unique), created_at",
+        "Typecheck passes"
+      ],
+      "priority": 9,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-010",
+      "title": "Create ingestion_log table schema",
+      "description": "As a developer, I need the ingestion_log table for debugging the content pipeline.",
+      "acceptanceCriteria": [
+        "Create SQL migration for ingestion_log table with columns: id (uuid PK), source_id (FK to sources), type (enum: email_received, rss_polled, extraction_success, extraction_failed, duplicate_skipped), details (jsonb), created_at",
+        "Typecheck passes"
+      ],
+      "priority": 10,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-011",
+      "title": "Seed sources table with 9 initial sources",
+      "description": "As a developer, I need the sources table seeded with the 6 newsletters and 3 company blogs.",
+      "acceptanceCriteria": [
+        "Create seed migration with 9 sources: The Rundown AI, Superhuman AI, TLDR AI, Ben's Bites, The Neuron, Import AI (newsletters), OpenAI Blog, Anthropic Blog, Google DeepMind Blog (blogs with feed_urls)",
+        "Each source has name, slug, type, description, audience, reach fields populated",
+        "Blog sources have feed_url set to their RSS URLs",
+        "Typecheck passes"
+      ],
+      "priority": 11,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-012",
+      "title": "Seed system_config with initial settings",
+      "description": "As a developer, I need system_config seeded with max_subscribers and subscriptions_paused settings.",
+      "acceptanceCriteria": [
+        "Seed max_subscribers with value {\"limit\": 3000, \"enabled\": true}",
+        "Seed subscriptions_paused with value {\"paused\": false, \"message\": \"We've hit capacity! Join the waitlist.\"}",
+        "Typecheck passes"
+      ],
+      "priority": 12,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-013",
+      "title": "Create TypeScript types for database schema",
+      "description": "As a developer, I need TypeScript types for all database tables.",
+      "acceptanceCriteria": [
+        "Create types/database.ts with interfaces for Source, Article, User, UserSubscription, UserArticleLog, SystemConfig, Waitlist, IngestionLog",
+        "Include enum types for source_type, frequency, ingestion_type",
+        "Typecheck passes"
+      ],
+      "priority": 13,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-014",
+      "title": "Create design system color constants",
+      "description": "As a developer, I need Tailwind configured with the design system colors.",
+      "acceptanceCriteria": [
+        "Update tailwind.config.ts with custom colors: cream (#FAFAF7), lavender (#B8A9E8), lavender-hover (#9B87D6), mint (#A8D8C8), peach (#F5C5A3), charcoal (#2D2D2D), warm-gray (#6B6B6B), light-gray (#9B9B9B), border-gray (#E8E8E4), error-rose (#E8A0A0), success-green (#A0D8B8)",
+        "Typecheck passes"
+      ],
+      "priority": 14,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-015",
+      "title": "Create reusable Button component",
+      "description": "As a developer, I need a reusable Button component with primary and secondary variants.",
+      "acceptanceCriteria": [
+        "Create components/ui/Button.tsx",
+        "Primary variant: lavender background, white text, lavender-hover on hover",
+        "Secondary variant: white background, charcoal text, border",
+        "Supports disabled state with loading spinner",
+        "Button has 8px border-radius, 12px 24px padding",
+        "Typecheck passes"
+      ],
+      "priority": 15,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-016",
+      "title": "Create reusable Input component",
+      "description": "As a developer, I need a reusable Input component for forms.",
+      "acceptanceCriteria": [
+        "Create components/ui/Input.tsx",
+        "White background, border-gray border, charcoal text",
+        "Lavender focus ring on focus",
+        "Supports error state with rose border",
+        "Typecheck passes"
+      ],
+      "priority": 16,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-017",
+      "title": "Create SourceCard component",
+      "description": "As a developer, I need a SourceCard component to display selectable news sources.",
+      "acceptanceCriteria": [
+        "Create components/SourceCard.tsx",
+        "Displays source name, description, reach, audience",
+        "Shows checkbox that toggles selected state",
+        "Selected state: lavender left border (3px), faint lavender background (8% opacity)",
+        "Hover state: elevated shadow",
+        "Typecheck passes"
+      ],
+      "priority": 17,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-018",
+      "title": "Create FrequencySelector component",
+      "description": "As a developer, I need a FrequencySelector component with Daily/Weekly pill buttons.",
+      "acceptanceCriteria": [
+        "Create components/FrequencySelector.tsx",
+        "Two pill-shaped buttons: Daily, Weekly",
+        "Selected pill: lavender fill, white text",
+        "Unselected pill: white fill, charcoal text, border",
+        "Helper text below shows schedule description",
+        "Typecheck passes"
+      ],
+      "priority": 18,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-019",
+      "title": "Create page header component with logo",
+      "description": "As a developer, I need a header component with logo and tagline.",
+      "acceptanceCriteria": [
+        "Create components/Header.tsx",
+        "Displays brand name (text logo)",
+        "Shows tagline: 'Your AI news, curated & deduplicated.'",
+        "Shows subtitle: 'Pick your sources. Choose your frequency. That's it.'",
+        "Typecheck passes"
+      ],
+      "priority": 19,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-020",
+      "title": "Create page footer component",
+      "description": "As a developer, I need a footer component.",
+      "acceptanceCriteria": [
+        "Create components/Footer.tsx",
+        "Displays 'Unsubscribe anytime' text",
+        "Centered, muted gray text",
+        "Typecheck passes"
+      ],
+      "priority": 20,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-021",
+      "title": "Build GET /api/sources endpoint",
+      "description": "As a developer, I need an API to fetch all active sources.",
+      "acceptanceCriteria": [
+        "Create app/api/sources/route.ts",
+        "Returns all sources where is_active = true",
+        "Sources grouped by type (newsletters, blogs)",
+        "Returns JSON array with id, name, slug, type, description, audience, reach",
+        "Typecheck passes"
+      ],
+      "priority": 21,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-022",
+      "title": "Build GET /api/subscription-status endpoint",
+      "description": "As a developer, I need an API to check if signups are open and waitlist count.",
+      "acceptanceCriteria": [
+        "Create app/api/subscription-status/route.ts",
+        "Reads system_config for max_subscribers and subscriptions_paused",
+        "Counts active verified users",
+        "Returns { accepting: boolean, waitlistCount: number }",
+        "Typecheck passes"
+      ],
+      "priority": 22,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-023",
+      "title": "Build POST /api/subscribe endpoint - validation",
+      "description": "As a developer, I need the subscribe endpoint to validate input.",
+      "acceptanceCriteria": [
+        "Create app/api/subscribe/route.ts",
+        "Validates email format",
+        "Validates sources array has at least 1 valid slug",
+        "Validates frequency is 'daily' or 'weekly'",
+        "Returns 400 with specific error messages for invalid input",
+        "Typecheck passes"
+      ],
+      "priority": 23,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-024",
+      "title": "Build POST /api/subscribe endpoint - cap check",
+      "description": "As a developer, I need the subscribe endpoint to check subscriber cap and add to waitlist if needed.",
+      "acceptanceCriteria": [
+        "Check if subscriptions are paused or cap reached",
+        "If at capacity: insert into waitlist table, return { waitlisted: true, position: N }",
+        "Position calculated from waitlist count",
+        "Typecheck passes"
+      ],
+      "priority": 24,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-025",
+      "title": "Build POST /api/subscribe endpoint - user creation",
+      "description": "As a developer, I need the subscribe endpoint to create users when under cap.",
+      "acceptanceCriteria": [
+        "Generate UUID for verification_token and unsubscribe_token",
+        "Insert into users table with email_verified=false",
+        "Insert into user_subscriptions for each selected source",
+        "Return { success: true, message: 'Check your email to confirm your subscription!' }",
+        "Handle existing email case with friendly message",
+        "Typecheck passes"
+      ],
+      "priority": 25,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-026",
+      "title": "Set up Resend email client",
+      "description": "As a developer, I need Resend configured to send emails.",
+      "acceptanceCriteria": [
+        "Install resend package",
+        "Create lib/email/resend.ts with configured Resend client",
+        "Export sendEmail function that wraps Resend API",
+        "Typecheck passes"
+      ],
+      "priority": 26,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-027",
+      "title": "Create verification email template",
+      "description": "As a developer, I need a verification email template.",
+      "acceptanceCriteria": [
+        "Install @react-email/components",
+        "Create emails/VerificationEmail.tsx",
+        "Subject: 'Confirm your AI Digest subscription'",
+        "Body has lavender CTA button 'Confirm Subscription'",
+        "Link includes verification token",
+        "Typecheck passes"
+      ],
+      "priority": 27,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-028",
+      "title": "Send verification email on signup",
+      "description": "As a developer, I need the subscribe endpoint to send verification emails.",
+      "acceptanceCriteria": [
+        "After user creation, send verification email via Resend",
+        "Email includes link to /api/verify?token={verification_token}",
+        "Handle email send failure gracefully",
+        "Typecheck passes"
+      ],
+      "priority": 28,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-029",
+      "title": "Build GET /api/verify endpoint",
+      "description": "As a developer, I need the verify endpoint for email confirmation.",
+      "acceptanceCriteria": [
+        "Create app/api/verify/route.ts",
+        "Look up user by verification_token",
+        "Set email_verified=true, clear verification_token",
+        "Redirect to /verify-success on success",
+        "Redirect to / with error param if token invalid",
+        "Typecheck passes"
+      ],
+      "priority": 29,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-030",
+      "title": "Build GET /api/unsubscribe endpoint",
+      "description": "As a developer, I need the unsubscribe endpoint for one-click unsubscribe.",
+      "acceptanceCriteria": [
+        "Create app/api/unsubscribe/route.ts",
+        "Look up user by unsubscribe_token",
+        "Set is_active=false",
+        "Redirect to /unsubscribed",
+        "Typecheck passes"
+      ],
+      "priority": 30,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-031",
+      "title": "Build GET /api/preferences endpoint",
+      "description": "As a developer, I need the preferences endpoint to fetch user's current settings.",
+      "acceptanceCriteria": [
+        "Create app/api/preferences/route.ts",
+        "Requires token query param (unsubscribe_token)",
+        "Returns user's current sources and frequency",
+        "Returns 404 if token invalid",
+        "Typecheck passes"
+      ],
+      "priority": 31,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-032",
+      "title": "Build PUT /api/preferences endpoint",
+      "description": "As a developer, I need the preferences endpoint to update user settings.",
+      "acceptanceCriteria": [
+        "Handle PUT requests in app/api/preferences/route.ts",
+        "Requires token in body",
+        "Updates user's frequency",
+        "Replaces user_subscriptions with new source selections",
+        "Returns success message",
+        "Typecheck passes"
+      ],
+      "priority": 32,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-033",
+      "title": "Build landing page - source selection section",
+      "description": "As a user, I want to see and select news sources on the landing page.",
+      "acceptanceCriteria": [
+        "Landing page (app/page.tsx) fetches sources from API",
+        "Displays newsletters in one group, blogs in another",
+        "Each source shown as SourceCard component",
+        "'Select All' text button below source lists",
+        "Selected sources tracked in state",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 33,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-034",
+      "title": "Build landing page - frequency and email section",
+      "description": "As a user, I want to choose frequency and enter my email on the landing page.",
+      "acceptanceCriteria": [
+        "FrequencySelector component with Daily/Weekly options",
+        "Daily selected by default",
+        "Email input field with placeholder 'your@email.com'",
+        "Subscribe button next to email input",
+        "Helper text: 'We'll send a confirmation email. No spam, ever.'",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 34,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-035",
+      "title": "Build landing page - form submission",
+      "description": "As a user, I want to submit the subscription form.",
+      "acceptanceCriteria": [
+        "Form submits to POST /api/subscribe",
+        "Button shows loading spinner during submission",
+        "Validation errors displayed below relevant fields",
+        "Error for no sources: 'Please select at least one source.'",
+        "Error for invalid email: 'Please enter a valid email address.'",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 35,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-036",
+      "title": "Build landing page - success state",
+      "description": "As a user, I want to see confirmation after successful signup.",
+      "acceptanceCriteria": [
+        "After successful submit, form area transitions to success card",
+        "Shows mint green checkmark icon",
+        "Shows 'Check your inbox!' heading",
+        "Shows message with user's email address",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 36,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-037",
+      "title": "Build landing page - waitlist state",
+      "description": "As a user, I want to join the waitlist when capacity is reached.",
+      "acceptanceCriteria": [
+        "Page checks subscription-status on load",
+        "If accepting=false, hide source selection and frequency",
+        "Show waitlist message and email-only form",
+        "Show waitlist count",
+        "After joining, show confirmation with position",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 37,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-038",
+      "title": "Build verify-success page",
+      "description": "As a user, I want to see confirmation after verifying my email.",
+      "acceptanceCriteria": [
+        "Create app/verify-success/page.tsx",
+        "Shows checkmark icon and 'You're all set!' heading",
+        "Shows message about first digest arriving based on frequency",
+        "Link to manage preferences",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 38,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-039",
+      "title": "Build preferences page",
+      "description": "As a user, I want to manage my subscription preferences.",
+      "acceptanceCriteria": [
+        "Create app/preferences/page.tsx",
+        "Reads token from URL query params",
+        "Fetches current preferences from API",
+        "Shows source cards pre-checked with user's sources",
+        "Shows frequency selector with user's frequency selected",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 39,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-040",
+      "title": "Build preferences page - save functionality",
+      "description": "As a user, I want to save changes to my preferences.",
+      "acceptanceCriteria": [
+        "Save Changes button submits to PUT /api/preferences",
+        "Shows success message on save",
+        "Unsubscribe link at bottom",
+        "Unsubscribe link goes to /api/unsubscribe?token={token}",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 40,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-041",
+      "title": "Build unsubscribed page",
+      "description": "As a user, I want to see confirmation after unsubscribing.",
+      "acceptanceCriteria": [
+        "Create app/unsubscribed/page.tsx",
+        "Shows 'You've been unsubscribed.' heading",
+        "Shows message about no more emails",
+        "Re-subscribe link that goes to landing page",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 41,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-042",
+      "title": "Create URL normalization utility",
+      "description": "As a developer, I need URL normalization for deduplication.",
+      "acceptanceCriteria": [
+        "Create lib/utils/url.ts with normalizeUrl function",
+        "Converts to lowercase",
+        "Removes utm_*, ref, source, mc_cid, mc_eid query params",
+        "Removes trailing slashes",
+        "Removes www. prefix",
+        "Removes URL fragments (#section)",
+        "Typecheck passes"
+      ],
+      "priority": 42,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-043",
+      "title": "Create URL hash utility",
+      "description": "As a developer, I need SHA-256 hashing for URL deduplication.",
+      "acceptanceCriteria": [
+        "Add hashUrl function to lib/utils/url.ts",
+        "Takes normalized URL and returns SHA-256 hash as hex string",
+        "Typecheck passes"
+      ],
+      "priority": 43,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-044",
+      "title": "Set up Anthropic client for content extraction",
+      "description": "As a developer, I need the Anthropic SDK configured for Claude API calls.",
+      "acceptanceCriteria": [
+        "Install @anthropic-ai/sdk package",
+        "Create lib/ai/anthropic.ts with configured client",
+        "Export extractArticles function stub",
+        "Typecheck passes"
+      ],
+      "priority": 44,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-045",
+      "title": "Implement Claude article extraction prompt",
+      "description": "As a developer, I need the Claude extraction logic for newsletter content.",
+      "acceptanceCriteria": [
+        "Implement extractArticles in lib/ai/anthropic.ts",
+        "Uses prompt from PRD section 4.4",
+        "Sends HTML content to Claude Sonnet",
+        "Parses JSON response into Article array",
+        "Handles JSON parse errors with retry",
+        "Returns extraction_confidence for each article",
+        "Typecheck passes"
+      ],
+      "priority": 45,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-046",
+      "title": "Create raw_emails temporary table",
+      "description": "As a developer, I need a table to queue incoming emails for processing.",
+      "acceptanceCriteria": [
+        "Create SQL migration for raw_emails table with columns: id (uuid PK), source_id (FK), recipient, sender, subject, body_html, body_plain, message_id, received_at, processed (boolean default false), created_at",
+        "Typecheck passes"
+      ],
+      "priority": 46,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-047",
+      "title": "Build POST /api/ingest/email endpoint - webhook validation",
+      "description": "As a developer, I need the email webhook to validate Mailgun signatures.",
+      "acceptanceCriteria": [
+        "Create app/api/ingest/email/route.ts",
+        "Validate Mailgun webhook signature using timestamp, token, and signing key",
+        "Return 401 if signature invalid",
+        "Typecheck passes"
+      ],
+      "priority": 47,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-048",
+      "title": "Build POST /api/ingest/email endpoint - queue email",
+      "description": "As a developer, I need the email webhook to queue emails for processing.",
+      "acceptanceCriteria": [
+        "Match recipient to sources.intake_email",
+        "Skip if source not found or inactive",
+        "Insert into raw_emails table",
+        "Log to ingestion_log with type 'email_received'",
+        "Return 200 OK immediately",
+        "Typecheck passes"
+      ],
+      "priority": 48,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-049",
+      "title": "Create email processing background job",
+      "description": "As a developer, I need a job to process queued raw emails.",
+      "acceptanceCriteria": [
+        "Create lib/jobs/processEmails.ts",
+        "Fetches unprocessed raw_emails",
+        "For each email: calls Claude extraction, stores articles with dedup",
+        "Marks email as processed",
+        "Logs success/failure to ingestion_log",
+        "Typecheck passes"
+      ],
+      "priority": 49,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-050",
+      "title": "Build POST /api/ingest/process-emails cron endpoint",
+      "description": "As a developer, I need a cron endpoint to trigger email processing.",
+      "acceptanceCriteria": [
+        "Create app/api/ingest/process-emails/route.ts",
+        "Validates CRON_SECRET header",
+        "Calls processEmails job",
+        "Returns processing results",
+        "Typecheck passes"
+      ],
+      "priority": 50,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-051",
+      "title": "Create RSS feed fetcher utility",
+      "description": "As a developer, I need a utility to fetch and parse RSS feeds.",
+      "acceptanceCriteria": [
+        "Install rss-parser package",
+        "Create lib/rss/parser.ts",
+        "Export fetchFeed function that takes URL and returns parsed items",
+        "Extract title, link, description, pubDate, enclosure/media for each item",
+        "Typecheck passes"
+      ],
+      "priority": 51,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-052",
+      "title": "Build POST /api/ingest/rss endpoint",
+      "description": "As a developer, I need the RSS polling endpoint.",
+      "acceptanceCriteria": [
+        "Create app/api/ingest/rss/route.ts",
+        "Validates CRON_SECRET header",
+        "Fetches all blog sources with feed_url",
+        "For each source: fetch RSS, parse items, normalize URLs, check for duplicates",
+        "Insert new articles, skip duplicates",
+        "Log to ingestion_log",
+        "Typecheck passes"
+      ],
+      "priority": 52,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-053",
+      "title": "Create digest assembly query",
+      "description": "As a developer, I need a query to get unsent articles for a user.",
+      "acceptanceCriteria": [
+        "Create lib/digest/getUnsentArticles.ts",
+        "Query articles where: source_id in user's subscriptions, published_at > user.signed_up_at, article.id not in user_article_log, confidence >= 0.5",
+        "Order by published_at DESC, limit 20",
+        "Group results by source",
+        "Typecheck passes"
+      ],
+      "priority": 53,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-054",
+      "title": "Create digest email template",
+      "description": "As a developer, I need the digest email template.",
+      "acceptanceCriteria": [
+        "Create emails/DigestEmail.tsx",
+        "Header with logo and date",
+        "Article count summary",
+        "Articles grouped by source with source name headers",
+        "Each article: clickable headline, 2-3 sentence summary, tag pills",
+        "Footer with unsubscribe and manage preferences links",
+        "Typecheck passes"
+      ],
+      "priority": 54,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-055",
+      "title": "Create digest sending function",
+      "description": "As a developer, I need a function to send digest emails to users.",
+      "acceptanceCriteria": [
+        "Create lib/digest/sendDigest.ts",
+        "Takes user and articles array",
+        "Renders DigestEmail template",
+        "Sends via Resend with subject: 'Your AI Digest - {date} ({count} stories)'",
+        "Includes List-Unsubscribe header",
+        "Returns send result",
+        "Typecheck passes"
+      ],
+      "priority": 55,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-056",
+      "title": "Create digest batch processing job",
+      "description": "As a developer, I need a job to process and send digests to all eligible users.",
+      "acceptanceCriteria": [
+        "Create lib/jobs/sendDigests.ts",
+        "Takes frequency parameter ('daily' or 'weekly')",
+        "Queries active, verified users with matching frequency",
+        "For each user: get unsent articles, skip if 0, send digest",
+        "Insert into user_article_log for sent articles",
+        "Update user.last_email_sent_at",
+        "Rate limit to 10 emails/second",
+        "Typecheck passes"
+      ],
+      "priority": 56,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-057",
+      "title": "Build POST /api/digest/send endpoint",
+      "description": "As a developer, I need the cron endpoint to trigger digest sending.",
+      "acceptanceCriteria": [
+        "Create app/api/digest/send/route.ts",
+        "Validates CRON_SECRET header",
+        "Accepts frequency query param",
+        "Calls sendDigests job with frequency",
+        "Returns send statistics",
+        "Typecheck passes"
+      ],
+      "priority": 57,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-058",
+      "title": "Configure Vercel cron for email processing",
+      "description": "As a developer, I need cron configured to process emails every 5 minutes.",
+      "acceptanceCriteria": [
+        "Create or update vercel.json with cron config",
+        "Cron job hits /api/ingest/process-emails every 5 minutes",
+        "Typecheck passes"
+      ],
+      "priority": 58,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-059",
+      "title": "Configure Vercel cron for RSS polling",
+      "description": "As a developer, I need cron configured to poll RSS feeds every 2 hours.",
+      "acceptanceCriteria": [
+        "Update vercel.json with cron config",
+        "Cron job hits /api/ingest/rss every 2 hours",
+        "Typecheck passes"
+      ],
+      "priority": 59,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-060",
+      "title": "Configure Vercel cron for daily digests",
+      "description": "As a developer, I need cron configured to send daily digests at 8 AM IST.",
+      "acceptanceCriteria": [
+        "Update vercel.json with cron config",
+        "Cron job hits /api/digest/send?frequency=daily at 8 AM IST (2:30 AM UTC)",
+        "Typecheck passes"
+      ],
+      "priority": 60,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-061",
+      "title": "Configure Vercel cron for weekly digests",
+      "description": "As a developer, I need cron configured to send weekly digests on Monday 8 AM IST.",
+      "acceptanceCriteria": [
+        "Update vercel.json with cron config",
+        "Cron job hits /api/digest/send?frequency=weekly every Monday at 8 AM IST",
+        "Typecheck passes"
+      ],
+      "priority": 61,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-062",
+      "title": "Add rate limiting to subscribe endpoint",
+      "description": "As a developer, I need rate limiting on the subscribe endpoint.",
+      "acceptanceCriteria": [
+        "Install @upstash/ratelimit and @upstash/redis packages",
+        "Add rate limiter middleware to POST /api/subscribe",
+        "Limit to 5 requests per IP per minute",
+        "Return 429 Too Many Requests when exceeded",
+        "Typecheck passes"
+      ],
+      "priority": 62,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-063",
+      "title": "Add mobile responsive styles to landing page",
+      "description": "As a user, I want the landing page to work well on mobile devices.",
+      "acceptanceCriteria": [
+        "Source cards stack full-width on mobile (<480px)",
+        "Frequency pills stack vertically on mobile",
+        "Email input and button stack vertically on mobile",
+        "Reduced padding (16px) on mobile",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 63,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-064",
+      "title": "Create .env.example file",
+      "description": "As a developer, I need documented environment variables.",
+      "acceptanceCriteria": [
+        "Create .env.example with all required env vars",
+        "Include: NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY, SUPABASE_SERVICE_ROLE_KEY, RESEND_API_KEY, MAILGUN_SIGNING_KEY, MAILGUN_DOMAIN, ANTHROPIC_API_KEY, CRON_SECRET, NEXT_PUBLIC_APP_URL, FROM_EMAIL",
+        "Add comments describing each variable",
+        "Typecheck passes"
+      ],
+      "priority": 64,
+      "passes": false,
+      "notes": ""
+    }
+  ]
+}
