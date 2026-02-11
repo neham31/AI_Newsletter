@@ -169,3 +169,18 @@ AI News Aggregator & Newsletter Platform - Curated AI news from top newsletters 
   - Composite index (source_id, type) optimizes common filter patterns like "all extraction failures for source X"
 ---
 
+## 2026-02-11 - US-011
+- **Implemented:** Seed sources table with 9 initial sources
+- **Files created:**
+  - supabase/migrations/20260211000009_seed_sources.sql
+- **Seed details:**
+  - 6 newsletters: The Rundown AI, Superhuman AI, TLDR AI, Ben's Bites, The Neuron, Import AI
+  - 3 blogs: OpenAI Blog, Anthropic Blog, Google DeepMind Blog
+  - Each source has name, slug, type, description, audience, reach populated
+  - Blog sources include feed_url pointing to their RSS feeds
+- **Learnings for future iterations:**
+  - Use `ON CONFLICT (column) DO UPDATE SET` pattern to make seed migrations idempotent
+  - Escape single quotes in SQL strings by doubling them (e.g., "Ben''s Bites")
+  - RSS feed URLs for major AI labs: openai.com/blog/rss.xml, anthropic.com/rss.xml, deepmind.google/blog/rss.xml
+---
+
