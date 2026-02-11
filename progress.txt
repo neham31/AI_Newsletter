@@ -155,3 +155,17 @@ AI News Aggregator & Newsletter Platform - Curated AI news from top newsletters 
   - created_at index enables efficient calculation of waitlist position
 ---
 
+## 2026-02-11 - US-010
+- **Implemented:** Create ingestion_log table schema
+- **Files created:**
+  - supabase/migrations/20260211000008_create_ingestion_log_table.sql
+- **Schema details:**
+  - Created `ingestion_type` enum with values: 'email_received', 'rss_polled', 'extraction_success', 'extraction_failed', 'duplicate_skipped'
+  - Table columns: id (UUID PK), source_id (FK to sources, nullable for system-level events), type (ingestion_type enum), details (JSONB), created_at
+  - Indexes: idx_ingestion_log_source_id, idx_ingestion_log_type, idx_ingestion_log_created_at (DESC), idx_ingestion_log_source_type (composite)
+- **Learnings for future iterations:**
+  - Use `DO $$ ... EXCEPTION WHEN duplicate_object ... END $$` pattern to safely create enums idempotently
+  - source_id is nullable in ingestion_log since some log entries may not be source-specific
+  - Composite index (source_id, type) optimizes common filter patterns like "all extraction failures for source X"
+---
+
