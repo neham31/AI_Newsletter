@@ -337,3 +337,20 @@ AI News Aggregator & Newsletter Platform - Curated AI news from top newsletters 
   - Use text-sm for footer text to give it appropriate visual hierarchy
 ---
 
+## 2026-02-12 - US-021
+- **Implemented:** Build GET /api/sources endpoint
+- **Files created:**
+  - src/app/api/sources/route.ts
+- **Endpoint features:**
+  - GET /api/sources returns all active sources
+  - Sources grouped by type into `newsletters` and `blogs` arrays
+  - Returns fields: id, name, slug, type, description, audience, reach
+  - Uses server-side Supabase client from `@/lib/supabase/server`
+  - Includes error handling for database errors
+- **Learnings for future iterations:**
+  - API routes go in `src/app/api/[endpoint]/route.ts` using Next.js 14 App Router pattern
+  - Use `NextResponse.json()` for JSON responses with optional status options
+  - Import `createClient` from `@/lib/supabase/server` for server-side API routes
+  - TypeScript's `Pick<T, K>` utility type useful for defining response shapes with subset of fields
+---
+
