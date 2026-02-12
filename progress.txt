@@ -526,3 +526,21 @@ AI News Aggregator & Newsletter Platform - Curated AI news from top newsletters 
   - Both endpoints use is_active (unsubscribe) vs email_verified (verify) for different purposes
 ---
 
+## 2026-02-12 - US-031
+- **Implemented:** Build GET /api/preferences endpoint
+- **Files created:**
+  - src/app/api/preferences/route.ts
+- **Endpoint features:**
+  - GET /api/preferences?token={unsubscribe_token} fetches user preferences
+  - Validates token query param is provided (returns 400 if missing)
+  - Looks up user by unsubscribe_token
+  - Returns 404 if token is invalid
+  - Fetches user's subscribed source IDs from user_subscriptions table
+  - Fetches full source details for active sources
+  - Returns `{ frequency: Frequency, sources: SourcePreference[] }`
+- **Learnings for future iterations:**
+  - Avoid Supabase foreign key joins for TypeScript type safety - better to do separate queries
+  - Use `.in('id', array)` to fetch multiple records by ID efficiently
+  - Preferences endpoint uses unsubscribe_token for authentication (same token used in email links)
+---
+
