@@ -15,6 +15,18 @@ interface ValidationError {
   message: string;
 }
 
+/** Shape of max_subscribers config value */
+interface MaxSubscribersConfig {
+  limit: number;
+  enabled: boolean;
+}
+
+/** Shape of subscriptions_paused config value */
+interface SubscriptionsPausedConfig {
+  paused: boolean;
+  message: string;
+}
+
 /** Email regex pattern for validation */
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -152,13 +164,136 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Validation passed - return success for now
-    // US-024 and US-025 will add cap check and user creation
+    // Validation passed - check subscriber cap
+    const normalizedEmail = email.trim().toLowerCase();
+
+    // Fetch system config values
+    const { data: configData, error: configError } = await supabase
+      .from('system_config')
+      .select('key, value')
+      .in('key', ['max_subscribers', 'subscriptions_paused']);
+
+    if (configError) {
+      console.error('Error fetching system_config:', configError);
+      return NextResponse.json(
+        { error: 'Failed to check subscription status' },
+        { status: 500 }
+      );
+    }
+
+    // Parse config values
+    let maxSubscribers: MaxSubscribersConfig = { limit: 3000, enabled: true };
+    let subscriptionsPaused: SubscriptionsPausedConfig = { paused: false, message: '' };
+
+    for (const config of configData || []) {
+      if (config.key === 'max_subscribers') {
+        maxSubscribers = config.value as MaxSubscribersConfig;
+      } else if (config.key === 'subscriptions_paused') {
+        subscriptionsPaused = config.value as SubscriptionsPausedConfig;
+      }
+    }
+
+    // Count active, verified users
+    const { count: activeUserCount, error: countError } = await supabase
+      .from('users')
+      .select('*', { count: 'exact', head: true })
+      .eq('is_active', true)
+      .eq('email_verified', true);
+
+    if (countError) {
+      console.error('Error counting users:', countError);
+      return NextResponse.json(
+        { error: 'Failed to check subscription status' },
+        { status: 500 }
+      );
+    }
+
+    // Determine if accepting new subscriptions
+    const currentUserCount = activeUserCount ?? 0;
+    const isCapReached = maxSubscribers.enabled && currentUserCount >= maxSubscribers.limit;
+    const isAccepting = !subscriptionsPaused.paused && !isCapReached;
+
+    // If at capacity, add to waitlist
+    if (!isAccepting) {
+      // Check if email is already on waitlist
+      const { data: existingWaitlist, error: waitlistCheckError } = await supabase
+        .from('waitlist')
+        .select('id, created_at')
+        .eq('email', normalizedEmail)
+        .single();
+
+      if (waitlistCheckError && waitlistCheckError.code !== 'PGRST116') {
+        // PGRST116 is "not found" error, which is expected
+        console.error('Error checking waitlist:', waitlistCheckError);
+        return NextResponse.json(
+          { error: 'Failed to add to waitlist' },
+          { status: 500 }
+        );
+      }
+
+      if (existingWaitlist) {
+        // Email already on waitlist - calculate position
+        const { count: position, error: positionError } = await supabase
+          .from('waitlist')
+          .select('*', { count: 'exact', head: true })
+          .lte('created_at', existingWaitlist.created_at);
+
+        if (positionError) {
+          console.error('Error calculating waitlist position:', positionError);
+          return NextResponse.json(
+            { error: 'Failed to calculate waitlist position' },
+            { status: 500 }
+          );
+        }
+
+        return NextResponse.json({
+          waitlisted: true,
+          position: position ?? 1,
+          message: 'You\'re already on the waitlist!',
+        });
+      }
+
+      // Insert into waitlist
+      const { error: insertError } = await supabase
+        .from('waitlist')
+        .insert({ email: normalizedEmail });
+
+      if (insertError) {
+        console.error('Error inserting into waitlist:', insertError);
+        return NextResponse.json(
+          { error: 'Failed to add to waitlist' },
+          { status: 500 }
+        );
+      }
+
+      // Get position (count of entries in waitlist)
+      const { count: waitlistCount, error: waitlistCountError } = await supabase
+        .from('waitlist')
+        .select('*', { count: 'exact', head: true });
+
+      if (waitlistCountError) {
+        console.error('Error counting waitlist:', waitlistCountError);
+        // Still return success, just with position 0
+        return NextResponse.json({
+          waitlisted: true,
+          position: 0,
+          message: 'You\'ve been added to the waitlist!',
+        });
+      }
+
+      return NextResponse.json({
+        waitlisted: true,
+        position: waitlistCount ?? 1,
+        message: 'You\'ve been added to the waitlist!',
+      });
+    }
+
+    // US-025 will add user creation logic here
     return NextResponse.json({
       success: true,
-      message: 'Validation passed.',
+      message: 'Check your email to confirm your subscription!',
       validated: {
-        email: email.trim(),
+        email: normalizedEmail,
         frequency: frequency as Frequency,
         sources: validSlugs,
       },
