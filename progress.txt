@@ -471,3 +471,21 @@ AI News Aggregator & Newsletter Platform - Curated AI news from top newsletters 
   - Export both named and default export for flexibility
 ---
 
+## 2026-02-12 - US-028
+- **Implemented:** Send verification email on signup
+- **Files changed:**
+  - src/app/api/subscribe/route.ts (added sendEmail call with VerificationEmail template)
+  - .env.example (added NEXT_PUBLIC_APP_URL documentation)
+- **Features:**
+  - After user creation, sends verification email via Resend
+  - Email includes link to /api/verify?token={verification_token}
+  - Verification URL uses NEXT_PUBLIC_APP_URL env var (defaults to localhost:3000 for dev)
+  - Email send failures are logged but don't fail the request (user was already created)
+  - Uses React Email template for the verification email content
+- **Learnings for future iterations:**
+  - Import React Email templates directly and pass to sendEmail's `react` option
+  - Use NEXT_PUBLIC_APP_URL env var for building absolute URLs in emails
+  - Handle email send failures gracefully - log error but return success since the primary action (user creation) succeeded
+  - Consider queueing retries or admin notifications for email failures in production
+---
+
