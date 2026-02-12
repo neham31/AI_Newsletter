@@ -354,3 +354,20 @@ AI News Aggregator & Newsletter Platform - Curated AI news from top newsletters 
   - TypeScript's `Pick<T, K>` utility type useful for defining response shapes with subset of fields
 ---
 
+## 2026-02-12 - US-022
+- **Implemented:** Build GET /api/subscription-status endpoint
+- **Files created:**
+  - src/app/api/subscription-status/route.ts
+- **Endpoint features:**
+  - GET /api/subscription-status returns subscription availability status
+  - Reads max_subscribers and subscriptions_paused from system_config table
+  - Counts active, verified users to check against cap
+  - Counts waitlist entries for display
+  - Returns `{ accepting: boolean, waitlistCount: number }`
+  - Uses typed interfaces for system config values (MaxSubscribersConfig, SubscriptionsPausedConfig)
+- **Learnings for future iterations:**
+  - Use `{ count: 'exact', head: true }` with Supabase select to get count without fetching rows
+  - `.in('key', [...])` filters on multiple values efficiently in a single query
+  - Define TypeScript interfaces for JSONB config values to ensure type safety
+---
+
