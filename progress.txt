@@ -544,3 +544,23 @@ AI News Aggregator & Newsletter Platform - Curated AI news from top newsletters 
   - Preferences endpoint uses unsubscribe_token for authentication (same token used in email links)
 ---
 
+## 2026-02-12 - US-032
+- **Implemented:** Build PUT /api/preferences endpoint
+- **Files changed:**
+  - src/app/api/preferences/route.ts (added PUT handler)
+- **Endpoint features:**
+  - PUT /api/preferences updates user's subscription preferences
+  - Requires token in request body (unsubscribe_token)
+  - Validates frequency if provided (must be 'daily' or 'weekly')
+  - Validates sources if provided (must be non-empty array of valid slugs)
+  - Updates user's frequency in users table
+  - Replaces user_subscriptions (deletes existing, inserts new) for new source selections
+  - Returns `{ success: true, message: 'Preferences updated successfully' }`
+  - Uses service role client for write operations to bypass RLS
+- **Learnings for future iterations:**
+  - Use service role client (`createServiceRoleClient()`) for admin write operations
+  - Delete-then-insert pattern is simple for replacing subscriptions (no need for upsert logic)
+  - Validate all source slugs exist before deleting existing subscriptions to prevent data loss
+  - PUT endpoint accepts token in body unlike GET which uses query params
+---
+
