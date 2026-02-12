@@ -307,3 +307,19 @@ AI News Aggregator & Newsletter Platform - Curated AI news from top newsletters 
   - FrequencySelector follows similar pattern to SourceCard (page-specific component in `src/components/`)
 ---
 
+## 2026-02-12 - US-019
+- **Implemented:** Create page header component with logo
+- **Files created:**
+  - src/components/Header.tsx
+- **Component features:**
+  - Brand name displayed as text logo ("AI Digest") with bold charcoal text
+  - Tagline: "Your AI news, curated & deduplicated." in warm-gray
+  - Subtitle: "Pick your sources. Choose your frequency. That's it." in light-gray
+  - Responsive text sizing (text-3xl on mobile, text-4xl on md+)
+  - Centered layout with text-center
+- **Learnings for future iterations:**
+  - Header component follows same pattern as other page-specific components in `src/components/`
+  - Use `&amp;` and `&apos;` for HTML entities in JSX to avoid lint warnings
+  - Responsive typography: use md: prefix for larger screens (e.g., `text-3xl md:text-4xl`)
+---
+
