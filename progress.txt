@@ -508,3 +508,21 @@ AI News Aggregator & Newsletter Platform - Curated AI news from top newsletters 
   - PGRST116 error code from Supabase means "not found" for `.single()` queries
 ---
 
+## 2026-02-12 - US-030
+- **Implemented:** Build GET /api/unsubscribe endpoint for one-click unsubscribe
+- **Files created:**
+  - src/app/api/unsubscribe/route.ts
+- **Endpoint features:**
+  - GET /api/unsubscribe?token={unsubscribe_token} unsubscribes a user
+  - Looks up user by unsubscribe_token
+  - Sets is_active=false to deactivate the user
+  - Redirects to /unsubscribed on successful unsubscription
+  - Redirects to / with error=invalid_token if token not found
+  - Redirects to / with error=unsubscribe_failed if update fails
+  - Handles already-unsubscribed users gracefully (redirects to unsubscribed page)
+- **Learnings for future iterations:**
+  - Unsubscribe endpoint follows same pattern as verify endpoint - token lookup, update, redirect
+  - One-click unsubscribe is important for email compliance (CAN-SPAM, GDPR)
+  - Both endpoints use is_active (unsubscribe) vs email_verified (verify) for different purposes
+---
+
