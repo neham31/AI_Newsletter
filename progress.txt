@@ -407,3 +407,23 @@ AI News Aggregator & Newsletter Platform - Curated AI news from top newsletters 
   - Reuse config parsing pattern from subscription-status endpoint
 ---
 
+## 2026-02-12 - US-025
+- **Implemented:** Build POST /api/subscribe endpoint - user creation
+- **Files changed:**
+  - src/app/api/subscribe/route.ts (added user creation and subscription logic)
+- **Endpoint features:**
+  - Checks if email already exists in users table with friendly messages for different states
+  - Generates UUID for verification_token and unsubscribe_token using `crypto.randomUUID()`
+  - Inserts user into users table with email_verified=false
+  - Gets source IDs from validated slugs
+  - Inserts user_subscriptions for each selected source using batch insert
+  - Handles unique constraint violation (race condition) with friendly duplicate message
+  - Returns `{ success: true, message: 'Check your email to confirm your subscription!' }`
+- **Learnings for future iterations:**
+  - Use `crypto.randomUUID()` for generating UUIDs in Node.js (built-in, no package needed)
+  - Handle different user states: verified+active, pending verification, inactive
+  - PostgreSQL error code '23505' indicates unique constraint violation
+  - Use Map to efficiently look up source IDs from slugs for batch insert
+  - Create subscription records in batch with array of objects
+---
+
