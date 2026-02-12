@@ -371,3 +371,21 @@ AI News Aggregator & Newsletter Platform - Curated AI news from top newsletters 
   - Define TypeScript interfaces for JSONB config values to ensure type safety
 ---
 
+## 2026-02-12 - US-023
+- **Implemented:** Build POST /api/subscribe endpoint - validation
+- **Files created:**
+  - src/app/api/subscribe/route.ts
+- **Endpoint features:**
+  - POST /api/subscribe validates email, sources array, and frequency
+  - Email validation: checks for valid email format using regex
+  - Sources validation: checks array has at least 1 valid slug from database
+  - Frequency validation: checks value is 'daily' or 'weekly'
+  - Returns 400 with specific error messages for each invalid field
+  - Returns all validation errors in a single response (not just the first)
+- **Learnings for future iterations:**
+  - Use `ValidationError` interface with `field` and `message` for clear error handling
+  - Collect all validation errors before returning, better UX than one-at-a-time
+  - Sources validation requires DB check - verify slugs exist and are active
+  - Return validated/normalized data in success response for downstream use
+---
+
