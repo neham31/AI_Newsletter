@@ -4,7 +4,10 @@ import { useState, useEffect } from 'react'
 import { Header } from '@/components/Header'
 import { Footer } from '@/components/Footer'
 import { SourceCard } from '@/components/SourceCard'
-import { SourceType } from '@/types/database'
+import { FrequencySelector } from '@/components/FrequencySelector'
+import { Input } from '@/components/ui/Input'
+import { Button } from '@/components/ui/Button'
+import { SourceType, Frequency } from '@/types/database'
 
 interface SourceData {
   id: string
@@ -24,6 +27,8 @@ interface SourcesResponse {
 export default function Home() {
   const [sources, setSources] = useState<SourcesResponse>({ newsletters: [], blogs: [] })
   const [selectedSourceIds, setSelectedSourceIds] = useState<Set<string>>(new Set())
+  const [frequency, setFrequency] = useState<Frequency>('daily')
+  const [email, setEmail] = useState('')
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
@@ -162,6 +167,37 @@ export default function Home() {
               </button>
             </div>
           )}
+
+          {/* Frequency Selection Section */}
+          <section className="pt-4">
+            <h2 className="text-lg font-semibold text-charcoal mb-4">
+              Delivery Frequency
+            </h2>
+            <FrequencySelector value={frequency} onChange={setFrequency} />
+          </section>
+
+          {/* Email Subscription Section */}
+          <section className="pt-4">
+            <h2 className="text-lg font-semibold text-charcoal mb-4">
+              Subscribe
+            </h2>
+            <div className="flex gap-3">
+              <div className="flex-1">
+                <Input
+                  type="email"
+                  placeholder="your@email.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                />
+              </div>
+              <Button type="button">
+                Subscribe
+              </Button>
+            </div>
+            <p className="mt-3 text-sm text-warm-gray">
+              We&apos;ll send a confirmation email. No spam, ever.
+            </p>
+          </section>
         </div>
 
         <div className="mt-12">
