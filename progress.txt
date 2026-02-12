@@ -564,3 +564,24 @@ AI News Aggregator & Newsletter Platform - Curated AI news from top newsletters 
   - PUT endpoint accepts token in body unlike GET which uses query params
 ---
 
+## 2026-02-12 - US-033
+- **Implemented:** Build landing page - source selection section
+- **Files changed:**
+  - src/app/page.tsx (completely rewritten as client component with source selection)
+- **Features:**
+  - Fetches sources from /api/sources on mount using useEffect
+  - Displays newsletters and blogs in separate sections with section headers
+  - Uses SourceCard component for each source with checkbox selection
+  - Selected sources tracked in state using Set<string>
+  - "Select All" / "Deselect All" toggle button below source lists
+  - Loading state with "Loading sources..." message
+  - Error state with error message display
+  - Uses Header and Footer components
+  - Cream background with max-w-3xl centered container
+- **Learnings for future iterations:**
+  - Use 'use client' directive for pages with client-side state and effects
+  - Convert API response data to component-compatible shapes with helper functions
+  - Use Set<string> for efficient membership checking of selected IDs
+  - Conditional rendering for section visibility (sources.newsletters.length > 0)
+---
+
