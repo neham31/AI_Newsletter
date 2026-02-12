@@ -24,6 +24,11 @@ interface SourcesResponse {
   blogs: SourceData[]
 }
 
+interface SubscriptionStatusResponse {
+  accepting: boolean
+  waitlistCount: number
+}
+
 interface ValidationError {
   field: string
   message: string
@@ -50,24 +55,39 @@ export default function Home() {
   const [submitMessage, setSubmitMessage] = useState<string | null>(null)
   const [submitSuccess, setSubmitSuccess] = useState(false)
   const [submittedEmail, setSubmittedEmail] = useState<string>('')
+  const [subscriptionStatus, setSubscriptionStatus] = useState<SubscriptionStatusResponse | null>(null)
+  const [waitlistPosition, setWaitlistPosition] = useState<number | null>(null)
+  const [waitlistJoined, setWaitlistJoined] = useState(false)
 
   useEffect(() => {
-    async function fetchSources() {
+    async function fetchData() {
       try {
-        const response = await fetch('/api/sources')
-        if (!response.ok) {
+        // Fetch subscription status and sources in parallel
+        const [statusResponse, sourcesResponse] = await Promise.all([
+          fetch('/api/subscription-status'),
+          fetch('/api/sources'),
+        ])
+
+        if (!statusResponse.ok) {
+          throw new Error('Failed to fetch subscription status')
+        }
+        if (!sourcesResponse.ok) {
           throw new Error('Failed to fetch sources')
         }
-        const data: SourcesResponse = await response.json()
-        setSources(data)
+
+        const statusData: SubscriptionStatusResponse = await statusResponse.json()
+        const sourcesData: SourcesResponse = await sourcesResponse.json()
+
+        setSubscriptionStatus(statusData)
+        setSources(sourcesData)
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to load sources')
+        setError(err instanceof Error ? err.message : 'Failed to load data')
       } finally {
         setIsLoading(false)
       }
     }
 
-    fetchSources()
+    fetchData()
   }, [])
 
   const handleToggleSource = (sourceId: string) => {
@@ -112,6 +132,9 @@ export default function Home() {
       .map(s => s.slug)
   }
 
+  // Check if we're in waitlist mode (subscriptions not accepting)
+  const isWaitlistMode = subscriptionStatus !== null && !subscriptionStatus.accepting
+
   // Handle form submission
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -124,7 +147,8 @@ export default function Home() {
     // Client-side validation
     const errors: Record<string, string> = {}
 
-    if (selectedSourceIds.size === 0) {
+    // Only require source selection if NOT in waitlist mode
+    if (!isWaitlistMode && selectedSourceIds.size === 0) {
       errors.sources = 'Please select at least one source.'
     }
 
@@ -151,7 +175,7 @@ export default function Home() {
         },
         body: JSON.stringify({
           email: emailTrimmed,
-          sources: getSelectedSlugs(),
+          sources: isWaitlistMode ? [] : getSelectedSlugs(),
           frequency,
         }),
       })
@@ -178,7 +202,11 @@ export default function Home() {
         setSubmitSuccess(true)
         setSubmitMessage(data.message || 'Check your email to confirm your subscription!')
       } else if (data.waitlisted) {
-        setSubmitMessage(data.message || `You've been added to the waitlist! Position: ${data.position}`)
+        // Waitlist success
+        setSubmittedEmail(emailTrimmed)
+        setWaitlistPosition(data.position || null)
+        setWaitlistJoined(true)
+        setSubmitMessage(data.message || `You've been added to the waitlist!`)
       } else if (data.message) {
         // Handle cases like "email already subscribed"
         setSubmitMessage(data.message)
@@ -256,6 +284,145 @@ export default function Home() {
                 Click the link in the email to start receiving your personalized AI digest.
               </p>
             </div>
+          </div>
+
+          <div className="mt-12">
+            <Footer />
+          </div>
+        </div>
+      </main>
+    )
+  }
+
+  // Waitlist Joined State - Show confirmation with position
+  if (waitlistJoined) {
+    return (
+      <main className="min-h-screen bg-cream">
+        <div className="mx-auto max-w-3xl px-6 py-12">
+          <Header />
+
+          <div className="mt-12 flex flex-col items-center">
+            <div className="bg-white rounded-lg shadow-md p-8 w-full max-w-md text-center">
+              {/* Lavender Clock/Queue Icon */}
+              <div className="mx-auto w-16 h-16 rounded-full bg-lavender flex items-center justify-center mb-6">
+                <svg
+                  className="w-8 h-8 text-white"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                  />
+                </svg>
+              </div>
+
+              {/* Heading */}
+              <h2 className="text-2xl font-bold text-charcoal mb-3">
+                You&apos;re on the waitlist!
+              </h2>
+
+              {/* Position */}
+              {waitlistPosition && (
+                <p className="text-lg text-lavender font-semibold mb-4">
+                  Position #{waitlistPosition}
+                </p>
+              )}
+
+              {/* Message with user's email */}
+              <p className="text-warm-gray">
+                We&apos;ll notify{' '}
+                <span className="font-semibold text-charcoal">{submittedEmail}</span>{' '}
+                when a spot opens up. Thanks for your patience!
+              </p>
+            </div>
+          </div>
+
+          <div className="mt-12">
+            <Footer />
+          </div>
+        </div>
+      </main>
+    )
+  }
+
+  // Waitlist Mode - Show simplified email-only form
+  if (isWaitlistMode) {
+    return (
+      <main className="min-h-screen bg-cream">
+        <div className="mx-auto max-w-3xl px-6 py-12">
+          <Header />
+
+          <div className="mt-12 flex flex-col items-center">
+            {/* Waitlist Message Card */}
+            <div className="bg-white rounded-lg shadow-md p-8 w-full max-w-md text-center mb-8">
+              {/* Peach Alert Icon */}
+              <div className="mx-auto w-16 h-16 rounded-full bg-peach flex items-center justify-center mb-6">
+                <svg
+                  className="w-8 h-8 text-white"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                  />
+                </svg>
+              </div>
+
+              {/* Heading */}
+              <h2 className="text-2xl font-bold text-charcoal mb-3">
+                We&apos;ve hit capacity!
+              </h2>
+
+              {/* Message */}
+              <p className="text-warm-gray mb-4">
+                Join the waitlist to be notified when a spot opens up.
+              </p>
+
+              {/* Waitlist Count */}
+              {subscriptionStatus && subscriptionStatus.waitlistCount > 0 && (
+                <p className="text-sm text-light-gray">
+                  {subscriptionStatus.waitlistCount} {subscriptionStatus.waitlistCount === 1 ? 'person' : 'people'} ahead of you
+                </p>
+              )}
+            </div>
+
+            {/* Waitlist Form */}
+            <form onSubmit={handleSubmit} className="w-full max-w-md">
+              <div className="flex gap-3">
+                <div className="flex-1">
+                  <Input
+                    type="email"
+                    placeholder="your@email.com"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    error={!!fieldErrors.email}
+                  />
+                  {fieldErrors.email && (
+                    <p className="mt-1 text-error-rose text-sm">
+                      {fieldErrors.email}
+                    </p>
+                  )}
+                </div>
+                <Button type="submit" disabled={isSubmitting} isLoading={isSubmitting}>
+                  Join Waitlist
+                </Button>
+              </div>
+              {submitMessage && !waitlistJoined && (
+                <p className="mt-3 text-sm text-warm-gray text-center">
+                  {submitMessage}
+                </p>
+              )}
+            </form>
           </div>
 
           <div className="mt-12">
