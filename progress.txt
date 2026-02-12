@@ -585,3 +585,20 @@ AI News Aggregator & Newsletter Platform - Curated AI news from top newsletters 
   - Conditional rendering for section visibility (sources.newsletters.length > 0)
 ---
 
+## 2026-02-12 - US-034
+- **Implemented:** Build landing page - frequency and email section
+- **Files changed:**
+  - src/app/page.tsx (added FrequencySelector, email input, and subscribe button)
+- **Features:**
+  - FrequencySelector component integrated with Daily/Weekly options
+  - Daily frequency selected by default via `useState<Frequency>('daily')`
+  - Email input field with placeholder 'your@email.com'
+  - Subscribe button positioned next to email input using flex layout
+  - Helper text: "We'll send a confirmation email. No spam, ever."
+  - New state: `frequency` and `email` for controlled inputs
+- **Learnings for future iterations:**
+  - Use `&apos;` for apostrophes in JSX text to avoid lint warnings
+  - Flex layout with `flex gap-3` and `flex-1` provides responsive email + button arrangement
+  - Import Frequency type from database.ts to ensure type safety with FrequencySelector
+---
+
