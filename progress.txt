@@ -290,3 +290,20 @@ AI News Aggregator & Newsletter Platform - Curated AI news from top newsletters 
   - line-clamp-2 utility truncates text to 2 lines with ellipsis
 ---
 
+## 2026-02-12 - US-018
+- **Implemented:** Create FrequencySelector component
+- **Files created:**
+  - src/components/FrequencySelector.tsx
+- **Component features:**
+  - Two pill-shaped buttons (Daily, Weekly) using `rounded-full px-6 py-2`
+  - Selected state: lavender fill with white text (`bg-lavender text-white`)
+  - Unselected state: white fill, charcoal text, border (`bg-white text-charcoal border border-border-gray`)
+  - Helper text below showing schedule description based on selection
+  - Keyboard accessible with focus ring styling
+  - Uses role="radiogroup" and role="radio" with aria-checked for accessibility
+- **Learnings for future iterations:**
+  - Use `rounded-full` for pill-shaped buttons in Tailwind
+  - Radio group pattern: use `role="radiogroup"` on container and `role="radio"` with `aria-checked` on individual options
+  - FrequencySelector follows similar pattern to SourceCard (page-specific component in `src/components/`)
+---
+
