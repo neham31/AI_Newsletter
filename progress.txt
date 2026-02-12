@@ -389,3 +389,21 @@ AI News Aggregator & Newsletter Platform - Curated AI news from top newsletters 
   - Return validated/normalized data in success response for downstream use
 ---
 
+## 2026-02-12 - US-024
+- **Implemented:** Build POST /api/subscribe endpoint - cap check
+- **Files changed:**
+  - src/app/api/subscribe/route.ts (added cap check and waitlist logic)
+- **Endpoint features:**
+  - Checks system_config for max_subscribers and subscriptions_paused settings
+  - Counts active, verified users to compare against cap limit
+  - If at capacity (paused or cap reached): inserts email into waitlist table
+  - Handles duplicate waitlist entries gracefully (returns existing position)
+  - Returns `{ waitlisted: true, position: N }` when added to waitlist
+  - Position calculated from waitlist count
+- **Learnings for future iterations:**
+  - Supabase returns error code 'PGRST116' when `.single()` query finds no rows
+  - Use `.lte('created_at', timestamp)` to calculate position relative to when user joined waitlist
+  - Normalize email to lowercase before storing to prevent duplicate entries
+  - Reuse config parsing pattern from subscription-status endpoint
+---
+
