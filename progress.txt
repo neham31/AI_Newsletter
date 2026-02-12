@@ -489,3 +489,22 @@ AI News Aggregator & Newsletter Platform - Curated AI news from top newsletters 
   - Consider queueing retries or admin notifications for email failures in production
 ---
 
+## 2026-02-12 - US-029
+- **Implemented:** Build GET /api/verify endpoint for email confirmation
+- **Files created:**
+  - src/app/api/verify/route.ts
+- **Endpoint features:**
+  - GET /api/verify?token={verification_token} verifies user's email
+  - Looks up user by verification_token
+  - Sets email_verified=true and clears verification_token
+  - Redirects to /verify-success on successful verification
+  - Redirects to / with error=invalid_token if token not found
+  - Redirects to / with error=verification_failed if update fails
+  - Handles already-verified users gracefully (redirects to success page)
+- **Learnings for future iterations:**
+  - Use `NextResponse.redirect()` for redirect responses in Next.js API routes
+  - Build redirect URLs using `new URL(path, request.url)` for proper URL construction
+  - Use `searchParams.set()` to add query parameters to URLs
+  - PGRST116 error code from Supabase means "not found" for `.single()` queries
+---
+
