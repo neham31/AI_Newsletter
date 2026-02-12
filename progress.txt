@@ -625,3 +625,21 @@ AI News Aggregator & Newsletter Platform - Curated AI news from top newsletters 
   - Subscribe API returns `{ errors: ValidationError[] }` for 400 responses
 ---
 
+## 2026-02-12 - US-036
+- **Implemented:** Build landing page - success state
+- **Files changed:**
+  - src/app/page.tsx (added success state UI with conditional rendering)
+- **Features:**
+  - Added `submittedEmail` state to track the email used during successful signup
+  - Success card displays when `submitSuccess` is true
+  - Mint green checkmark icon: circular bg-mint background with white SVG checkmark
+  - "Check your inbox!" heading in charcoal bold text
+  - Message showing user's email address with instruction to click confirmation link
+  - White card with rounded corners and shadow for visual prominence
+- **Learnings for future iterations:**
+  - Track form input values separately (like submittedEmail) to display in success states
+  - Use early return pattern for conditional full-page renders (e.g., `if (submitSuccess) return <SuccessView />`)
+  - SVG checkmark: use `strokeWidth={3}` for bold checkmarks, path `d="M5 13l4 4L19 7"`
+  - Use `&apos;` for apostrophes in JSX strings to avoid lint warnings
+---
+
