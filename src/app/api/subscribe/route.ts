@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { randomUUID } from 'crypto';
 import { createClient } from '@/lib/supabase/server';
+import { sendEmail } from '@/lib/email/resend';
+import { VerificationEmail } from '@/emails/VerificationEmail';
 import type { Frequency } from '@/types/database';
 
 /** Request body for subscribe endpoint */
@@ -392,7 +394,21 @@ export async function POST(request: NextRequest) {
       // In production, we might want to roll back or retry
     }
 
-    // US-028 will add verification email sending here
+    // Send verification email
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+    const verificationUrl = `${appUrl}/api/verify?token=${verificationToken}`;
+
+    const emailResult = await sendEmail({
+      to: normalizedEmail,
+      subject: 'Confirm your AI Digest subscription',
+      react: VerificationEmail({ verificationUrl }),
+    });
+
+    if (!emailResult.success) {
+      // Log the error but don't fail the request - user was created successfully
+      console.error('Failed to send verification email:', emailResult.error);
+      // In production, we might want to queue a retry or notify admin
+    }
 
     return NextResponse.json({
       success: true,
