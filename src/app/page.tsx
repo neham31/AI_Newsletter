@@ -49,6 +49,7 @@ export default function Home() {
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({})
   const [submitMessage, setSubmitMessage] = useState<string | null>(null)
   const [submitSuccess, setSubmitSuccess] = useState(false)
+  const [submittedEmail, setSubmittedEmail] = useState<string>('')
 
   useEffect(() => {
     async function fetchSources() {
@@ -173,6 +174,7 @@ export default function Home() {
 
       // Handle success or other responses
       if (data.success === true) {
+        setSubmittedEmail(emailTrimmed)
         setSubmitSuccess(true)
         setSubmitMessage(data.message || 'Check your email to confirm your subscription!')
       } else if (data.waitlisted) {
@@ -209,6 +211,55 @@ export default function Home() {
           <Header />
           <div className="mt-12 text-center text-error-rose">
             {error}
+          </div>
+        </div>
+      </main>
+    )
+  }
+
+  // Success State - Show confirmation card
+  if (submitSuccess) {
+    return (
+      <main className="min-h-screen bg-cream">
+        <div className="mx-auto max-w-3xl px-6 py-12">
+          <Header />
+
+          <div className="mt-12 flex flex-col items-center">
+            <div className="bg-white rounded-lg shadow-md p-8 w-full max-w-md text-center">
+              {/* Mint Green Checkmark Icon */}
+              <div className="mx-auto w-16 h-16 rounded-full bg-mint flex items-center justify-center mb-6">
+                <svg
+                  className="w-8 h-8 text-white"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={3}
+                    d="M5 13l4 4L19 7"
+                  />
+                </svg>
+              </div>
+
+              {/* Heading */}
+              <h2 className="text-2xl font-bold text-charcoal mb-3">
+                Check your inbox!
+              </h2>
+
+              {/* Message with user's email */}
+              <p className="text-warm-gray">
+                We&apos;ve sent a confirmation email to{' '}
+                <span className="font-semibold text-charcoal">{submittedEmail}</span>.
+                Click the link in the email to start receiving your personalized AI digest.
+              </p>
+            </div>
+          </div>
+
+          <div className="mt-12">
+            <Footer />
           </div>
         </div>
       </main>
