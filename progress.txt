@@ -427,3 +427,25 @@ AI News Aggregator & Newsletter Platform - Curated AI news from top newsletters 
   - Create subscription records in batch with array of objects
 ---
 
+## 2026-02-12 - US-026
+- **Implemented:** Set up Resend email client
+- **Files created:**
+  - src/lib/email/resend.ts
+- **Files changed:**
+  - package.json (added resend package)
+  - .env.example (added RESEND_API_KEY and FROM_EMAIL)
+- **Features:**
+  - Installed resend package for email sending
+  - Created Resend client initialized with RESEND_API_KEY environment variable
+  - Exported `sendEmail` wrapper function with clean interface:
+    - Takes to, subject, html/react content, optional from, replyTo, and headers
+    - Returns `{ success: boolean, id?: string, error?: string }`
+  - Handles errors gracefully and logs to console
+  - Exported raw `resend` client for advanced use cases
+- **Learnings for future iterations:**
+  - Email lib goes in `src/lib/email/` directory
+  - Resend uses `replyTo` not `reply_to` in their API (camelCase)
+  - Support both `html` and `react` content for email rendering (react for React Email templates)
+  - FROM_EMAIL env var provides default sender address if not specified per-email
+---
+
