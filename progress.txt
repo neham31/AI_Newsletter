@@ -602,3 +602,26 @@ AI News Aggregator & Newsletter Platform - Curated AI news from top newsletters 
   - Import Frequency type from database.ts to ensure type safety with FrequencySelector
 ---
 
+## 2026-02-12 - US-035
+- **Implemented:** Build landing page - form submission
+- **Files changed:**
+  - src/app/page.tsx (added form submission, validation, and error handling)
+- **Features:**
+  - Wrapped content in `<form onSubmit={handleSubmit}>` element
+  - Added client-side validation for sources (at least 1) and email format
+  - Submit to POST /api/subscribe endpoint with email, sources (slugs), and frequency
+  - Button shows loading spinner via `isLoading={isSubmitting}` prop
+  - Validation errors displayed below relevant fields:
+    - Source error: "Please select at least one source." (centered below Select All)
+    - Email error: "Please enter a valid email address." (below input)
+  - Handle server validation errors from response
+  - Handle success, waitlist, and existing user response states
+  - Added state: `isSubmitting`, `fieldErrors`, `submitMessage`, `submitSuccess`
+- **Learnings for future iterations:**
+  - Use `getSelectedSlugs()` to convert selected IDs to slugs for API submission
+  - Button component uses `isLoading` prop (not `loading`) for loading state
+  - Client-side validation runs first, then API validation on server
+  - Use `Record<string, string>` for field-keyed error messages
+  - Subscribe API returns `{ errors: ValidationError[] }` for 400 responses
+---
+
