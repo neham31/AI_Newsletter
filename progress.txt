@@ -449,3 +449,25 @@ AI News Aggregator & Newsletter Platform - Curated AI news from top newsletters 
   - FROM_EMAIL env var provides default sender address if not specified per-email
 ---
 
+## 2026-02-12 - US-027
+- **Implemented:** Create verification email template
+- **Files created:**
+  - src/emails/VerificationEmail.tsx
+- **Files changed:**
+  - package.json (added @react-email/components)
+- **Template features:**
+  - Subject line: "Confirm your AI Digest subscription" (via Preview component)
+  - Lavender (#B8A9E8) CTA button "Confirm Subscription"
+  - Clean, centered layout with cream background (#FAFAF7)
+  - Heading, welcome text, CTA button, and footer with expiration notice
+  - Uses verificationUrl prop to include the verification link
+  - Inline styles for email client compatibility
+- **Learnings for future iterations:**
+  - Email templates go in `src/emails/` directory
+  - Use @react-email/components for building email templates
+  - Use inline styles (not Tailwind) for email compatibility across clients
+  - Preview component sets the email preview text shown in inbox
+  - Use `as const` for textAlign in style objects for TypeScript
+  - Export both named and default export for flexibility
+---
+
