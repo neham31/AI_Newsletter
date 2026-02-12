@@ -24,6 +24,20 @@ interface SourcesResponse {
   blogs: SourceData[]
 }
 
+interface ValidationError {
+  field: string
+  message: string
+}
+
+interface SubscribeResponse {
+  success?: boolean
+  errors?: ValidationError[]
+  waitlisted?: boolean
+  position?: number
+  message?: string
+  error?: string
+}
+
 export default function Home() {
   const [sources, setSources] = useState<SourcesResponse>({ newsletters: [], blogs: [] })
   const [selectedSourceIds, setSelectedSourceIds] = useState<Set<string>>(new Set())
@@ -31,6 +45,10 @@ export default function Home() {
   const [email, setEmail] = useState('')
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({})
+  const [submitMessage, setSubmitMessage] = useState<string | null>(null)
+  const [submitSuccess, setSubmitSuccess] = useState(false)
 
   useEffect(() => {
     async function fetchSources() {
@@ -85,6 +103,92 @@ export default function Home() {
     updated_at: '',
   })
 
+  // Get selected source slugs for form submission
+  const getSelectedSlugs = (): string[] => {
+    const allSources = [...sources.newsletters, ...sources.blogs]
+    return allSources
+      .filter(s => selectedSourceIds.has(s.id))
+      .map(s => s.slug)
+  }
+
+  // Handle form submission
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+
+    // Clear previous errors and messages
+    setFieldErrors({})
+    setSubmitMessage(null)
+    setSubmitSuccess(false)
+
+    // Client-side validation
+    const errors: Record<string, string> = {}
+
+    if (selectedSourceIds.size === 0) {
+      errors.sources = 'Please select at least one source.'
+    }
+
+    const emailTrimmed = email.trim()
+    if (!emailTrimmed) {
+      errors.email = 'Please enter a valid email address.'
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailTrimmed)) {
+      errors.email = 'Please enter a valid email address.'
+    }
+
+    if (Object.keys(errors).length > 0) {
+      setFieldErrors(errors)
+      return
+    }
+
+    // Submit to API
+    setIsSubmitting(true)
+
+    try {
+      const response = await fetch('/api/subscribe', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: emailTrimmed,
+          sources: getSelectedSlugs(),
+          frequency,
+        }),
+      })
+
+      const data: SubscribeResponse = await response.json()
+
+      if (!response.ok) {
+        // Handle validation errors from server
+        if (data.errors) {
+          const serverErrors: Record<string, string> = {}
+          for (const err of data.errors) {
+            serverErrors[err.field] = err.message
+          }
+          setFieldErrors(serverErrors)
+        } else if (data.error) {
+          setSubmitMessage(data.error)
+        }
+        return
+      }
+
+      // Handle success or other responses
+      if (data.success === true) {
+        setSubmitSuccess(true)
+        setSubmitMessage(data.message || 'Check your email to confirm your subscription!')
+      } else if (data.waitlisted) {
+        setSubmitMessage(data.message || `You've been added to the waitlist! Position: ${data.position}`)
+      } else if (data.message) {
+        // Handle cases like "email already subscribed"
+        setSubmitMessage(data.message)
+      }
+    } catch (err) {
+      console.error('Error submitting form:', err)
+      setSubmitMessage('Something went wrong. Please try again.')
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
   if (isLoading) {
     return (
       <main className="min-h-screen bg-cream">
@@ -116,7 +220,7 @@ export default function Home() {
       <div className="mx-auto max-w-3xl px-6 py-12">
         <Header />
 
-        <div className="mt-12 space-y-8">
+        <form onSubmit={handleSubmit} className="mt-12 space-y-8">
           {/* Newsletters Section */}
           {sources.newsletters.length > 0 && (
             <section>
@@ -168,6 +272,13 @@ export default function Home() {
             </div>
           )}
 
+          {/* Source Selection Error */}
+          {fieldErrors.sources && (
+            <p className="text-error-rose text-sm text-center">
+              {fieldErrors.sources}
+            </p>
+          )}
+
           {/* Frequency Selection Section */}
           <section className="pt-4">
             <h2 className="text-lg font-semibold text-charcoal mb-4">
@@ -188,17 +299,28 @@ export default function Home() {
                   placeholder="your@email.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
+                  error={!!fieldErrors.email}
                 />
+                {fieldErrors.email && (
+                  <p className="mt-1 text-error-rose text-sm">
+                    {fieldErrors.email}
+                  </p>
+                )}
               </div>
-              <Button type="button">
+              <Button type="submit" disabled={isSubmitting} isLoading={isSubmitting}>
                 Subscribe
               </Button>
             </div>
             <p className="mt-3 text-sm text-warm-gray">
               We&apos;ll send a confirmation email. No spam, ever.
             </p>
+            {submitMessage && !submitSuccess && (
+              <p className="mt-3 text-sm text-warm-gray">
+                {submitMessage}
+              </p>
+            )}
           </section>
-        </div>
+        </form>
 
         <div className="mt-12">
           <Footer />
