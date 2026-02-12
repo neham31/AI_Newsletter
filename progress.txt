@@ -643,3 +643,26 @@ AI News Aggregator & Newsletter Platform - Curated AI news from top newsletters 
   - Use `&apos;` for apostrophes in JSX strings to avoid lint warnings
 ---
 
+## 2026-02-12 - US-037
+- **Implemented:** Build landing page - waitlist state
+- **Files changed:**
+  - src/app/page.tsx (added waitlist mode UI with conditional rendering)
+- **Features:**
+  - Added subscription status check on page load via /api/subscription-status
+  - Parallel fetch of subscription status and sources for efficiency
+  - New state: `subscriptionStatus`, `waitlistPosition`, `waitlistJoined`, `isWaitlistMode`
+  - Waitlist mode shows when `accepting=false`: hides source selection and frequency
+  - Waitlist message card with peach alert icon and "We've hit capacity!" heading
+  - Shows waitlist count ("X people ahead of you")
+  - Email-only form with "Join Waitlist" button
+  - Waitlist joined confirmation card with lavender clock icon
+  - Shows waitlist position after successful join (Position #N)
+  - Form validation adapts to mode (sources not required in waitlist mode)
+- **Learnings for future iterations:**
+  - Use `Promise.all()` to fetch multiple APIs in parallel for better performance
+  - Create computed value `isWaitlistMode` to simplify conditional logic throughout component
+  - Reuse existing form submission logic by adapting validation based on mode
+  - Different icon colors for different states: mint=success, lavender=waiting, peach=alert
+  - SVG clock icon path: `d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"`
+---
+
