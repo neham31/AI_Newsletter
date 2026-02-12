@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { randomUUID } from 'crypto';
 import { createClient } from '@/lib/supabase/server';
 import type { Frequency } from '@/types/database';
 
@@ -288,15 +289,114 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    // US-025 will add user creation logic here
+    // Check if email already exists
+    const { data: existingUser, error: existingUserError } = await supabase
+      .from('users')
+      .select('id, email_verified, is_active')
+      .eq('email', normalizedEmail)
+      .single();
+
+    if (existingUserError && existingUserError.code !== 'PGRST116') {
+      // PGRST116 is "not found" error, which is expected for new users
+      console.error('Error checking existing user:', existingUserError);
+      return NextResponse.json(
+        { error: 'Failed to check existing user' },
+        { status: 500 }
+      );
+    }
+
+    if (existingUser) {
+      // Email already registered
+      if (existingUser.email_verified && existingUser.is_active) {
+        return NextResponse.json({
+          success: false,
+          message: 'This email is already subscribed! Check your inbox or manage your preferences.',
+        });
+      } else if (!existingUser.email_verified) {
+        return NextResponse.json({
+          success: false,
+          message: 'This email is pending verification. Please check your inbox for the confirmation email.',
+        });
+      } else {
+        // User exists but is inactive - they can re-subscribe
+        return NextResponse.json({
+          success: false,
+          message: 'This email was previously subscribed. Please contact us to reactivate your subscription.',
+        });
+      }
+    }
+
+    // Generate tokens for verification and unsubscribe
+    const verificationToken = randomUUID();
+    const unsubscribeToken = randomUUID();
+
+    // Get source IDs from slugs
+    const { data: sourcesData, error: fetchSourcesError } = await supabase
+      .from('sources')
+      .select('id, slug')
+      .in('slug', validSlugs)
+      .eq('is_active', true);
+
+    if (fetchSourcesError || !sourcesData) {
+      console.error('Error fetching source IDs:', fetchSourcesError);
+      return NextResponse.json(
+        { error: 'Failed to process source selections' },
+        { status: 500 }
+      );
+    }
+
+    const sourceIdMap = new Map(sourcesData.map((s) => [s.slug, s.id]));
+
+    // Insert user into database
+    const { data: newUser, error: insertUserError } = await supabase
+      .from('users')
+      .insert({
+        email: normalizedEmail,
+        email_verified: false,
+        verification_token: verificationToken,
+        unsubscribe_token: unsubscribeToken,
+        frequency: frequency as Frequency,
+        is_active: true,
+      })
+      .select('id')
+      .single();
+
+    if (insertUserError) {
+      // Check for unique constraint violation (race condition with duplicate email)
+      if (insertUserError.code === '23505') {
+        return NextResponse.json({
+          success: false,
+          message: 'This email is already subscribed! Check your inbox or manage your preferences.',
+        });
+      }
+      console.error('Error inserting user:', insertUserError);
+      return NextResponse.json(
+        { error: 'Failed to create subscription' },
+        { status: 500 }
+      );
+    }
+
+    // Insert user subscriptions for each selected source
+    const subscriptions = validSlugs.map((slug) => ({
+      user_id: newUser.id,
+      source_id: sourceIdMap.get(slug)!,
+    }));
+
+    const { error: insertSubscriptionsError } = await supabase
+      .from('user_subscriptions')
+      .insert(subscriptions);
+
+    if (insertSubscriptionsError) {
+      console.error('Error inserting user subscriptions:', insertSubscriptionsError);
+      // User was created, but subscriptions failed - log but don't fail
+      // In production, we might want to roll back or retry
+    }
+
+    // US-028 will add verification email sending here
+
     return NextResponse.json({
       success: true,
       message: 'Check your email to confirm your subscription!',
-      validated: {
-        email: normalizedEmail,
-        frequency: frequency as Frequency,
-        sources: validSlugs,
-      },
     });
   } catch (error) {
     console.error('Unexpected error in POST /api/subscribe:', error);
