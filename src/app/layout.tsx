@@ -5,8 +5,25 @@ import './globals.css'
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  title: 'AI News Aggregator',
-  description: 'Your AI news, curated & deduplicated.',
+  title: 'explAI.in - AI News Digest',
+  description: 'Your personalized AI news digest. Get the latest AI developments from top newsletters and blogs, curated and deduplicated.',
+  icons: {
+    icon: '/favicon.png',
+    shortcut: '/favicon.ico',
+    apple: '/favicon.png',
+  },
+  openGraph: {
+    title: 'explAI.in - AI News Digest',
+    description: 'Your personalized AI news digest. Get the latest AI developments from top newsletters and blogs, curated and deduplicated.',
+    images: ['/logo.png'],
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'explAI.in - AI News Digest',
+    description: 'Your personalized AI news digest. Get the latest AI developments from top newsletters and blogs.',
+    images: ['/logo.png'],
+  },
 }
 
 export default function RootLayout({

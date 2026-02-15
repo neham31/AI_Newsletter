@@ -222,7 +222,7 @@ export default function Home() {
   if (isLoading) {
     return (
       <main className="min-h-screen bg-cream">
-        <div className="mx-auto max-w-3xl px-6 py-12">
+        <div className="mx-auto max-w-3xl px-4 sm:px-6 py-8 sm:py-12">
           <Header />
           <div className="mt-12 text-center text-warm-gray">
             Loading sources...
@@ -235,7 +235,7 @@ export default function Home() {
   if (error) {
     return (
       <main className="min-h-screen bg-cream">
-        <div className="mx-auto max-w-3xl px-6 py-12">
+        <div className="mx-auto max-w-3xl px-4 sm:px-6 py-8 sm:py-12">
           <Header />
           <div className="mt-12 text-center text-error-rose">
             {error}
@@ -249,7 +249,7 @@ export default function Home() {
   if (submitSuccess) {
     return (
       <main className="min-h-screen bg-cream">
-        <div className="mx-auto max-w-3xl px-6 py-12">
+        <div className="mx-auto max-w-3xl px-4 sm:px-6 py-8 sm:py-12">
           <Header />
 
           <div className="mt-12 flex flex-col items-center">
@@ -298,7 +298,7 @@ export default function Home() {
   if (waitlistJoined) {
     return (
       <main className="min-h-screen bg-cream">
-        <div className="mx-auto max-w-3xl px-6 py-12">
+        <div className="mx-auto max-w-3xl px-4 sm:px-6 py-8 sm:py-12">
           <Header />
 
           <div className="mt-12 flex flex-col items-center">
@@ -354,7 +354,7 @@ export default function Home() {
   if (isWaitlistMode) {
     return (
       <main className="min-h-screen bg-cream">
-        <div className="mx-auto max-w-3xl px-6 py-12">
+        <div className="mx-auto max-w-3xl px-4 sm:px-6 py-8 sm:py-12">
           <Header />
 
           <div className="mt-12 flex flex-col items-center">
@@ -398,7 +398,7 @@ export default function Home() {
 
             {/* Waitlist Form */}
             <form onSubmit={handleSubmit} className="w-full max-w-md">
-              <div className="flex gap-3">
+              <div className="flex flex-col sm:flex-row gap-3">
                 <div className="flex-1">
                   <Input
                     type="email"
@@ -413,7 +413,7 @@ export default function Home() {
                     </p>
                   )}
                 </div>
-                <Button type="submit" disabled={isSubmitting} isLoading={isSubmitting}>
+                <Button type="submit" disabled={isSubmitting} isLoading={isSubmitting} className="w-full sm:w-auto">
                   Join Waitlist
                 </Button>
               </div>
@@ -435,14 +435,14 @@ export default function Home() {
 
   return (
     <main className="min-h-screen bg-cream">
-      <div className="mx-auto max-w-3xl px-6 py-12">
+      <div className="mx-auto max-w-3xl px-4 sm:px-6 py-8 sm:py-12">
         <Header />
 
         <form onSubmit={handleSubmit} className="mt-12 space-y-8">
           {/* Newsletters Section */}
           {sources.newsletters.length > 0 && (
             <section>
-              <h2 className="text-lg font-semibold text-charcoal mb-4">
+              <h2 className="text-xl font-semibold text-charcoal mb-4">
                 Newsletters
               </h2>
               <div className="grid gap-3">
@@ -461,7 +461,7 @@ export default function Home() {
           {/* Blogs Section */}
           {sources.blogs.length > 0 && (
             <section>
-              <h2 className="text-lg font-semibold text-charcoal mb-4">
+              <h2 className="text-xl font-semibold text-charcoal mb-4">
                 Blogs
               </h2>
               <div className="grid gap-3">
@@ -499,7 +499,7 @@ export default function Home() {
 
           {/* Frequency Selection Section */}
           <section className="pt-4">
-            <h2 className="text-lg font-semibold text-charcoal mb-4">
+            <h2 className="text-xl font-semibold text-charcoal mb-4">
               Delivery Frequency
             </h2>
             <FrequencySelector value={frequency} onChange={setFrequency} />
@@ -507,10 +507,10 @@ export default function Home() {
 
           {/* Email Subscription Section */}
           <section className="pt-4">
-            <h2 className="text-lg font-semibold text-charcoal mb-4">
+            <h2 className="text-xl font-semibold text-charcoal mb-4">
               Subscribe
             </h2>
-            <div className="flex gap-3">
+            <div className="flex flex-col sm:flex-row gap-3">
               <div className="flex-1">
                 <Input
                   type="email"
@@ -525,7 +525,7 @@ export default function Home() {
                   </p>
                 )}
               </div>
-              <Button type="submit" disabled={isSubmitting} isLoading={isSubmitting}>
+              <Button type="submit" disabled={isSubmitting} isLoading={isSubmitting} className="w-full sm:w-auto">
                 Subscribe
               </Button>
             </div>

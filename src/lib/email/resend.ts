@@ -1,4 +1,5 @@
 import { Resend } from 'resend';
+import { render } from '@react-email/render';
 
 // Initialize Resend client with API key from environment
 const resend = new Resend(process.env.RESEND_API_KEY);
@@ -28,12 +29,24 @@ export async function sendEmail(options: SendEmailOptions): Promise<SendEmailRes
   const fromEmail = options.from || process.env.FROM_EMAIL || 'AI Digest <noreply@example.com>';
 
   try {
+    // Render React component to HTML if provided
+    let html = options.html;
+    if (options.react && !html) {
+      html = await render(options.react);
+    }
+
+    if (!html) {
+      return {
+        success: false,
+        error: 'No HTML content provided',
+      };
+    }
+
     const { data, error } = await resend.emails.send({
       from: fromEmail,
       to: options.to,
       subject: options.subject,
-      html: options.html,
-      react: options.react,
+      html,
       replyTo: options.replyTo,
       headers: options.headers,
     });

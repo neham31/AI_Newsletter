@@ -3,9 +3,8 @@ import {
   Button,
   Container,
   Head,
-  Heading,
   Html,
-  Link,
+  Img,
   Preview,
   Section,
   Text,
@@ -16,18 +15,28 @@ interface VerificationEmailProps {
   verificationUrl: string;
 }
 
+const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+
 export const VerificationEmail = ({
   verificationUrl,
 }: VerificationEmailProps) => {
   return (
     <Html>
       <Head />
-      <Preview>Confirm your AI Digest subscription</Preview>
+      <Preview>Confirm your explAI.in subscription</Preview>
       <Body style={main}>
         <Container style={container}>
-          <Heading style={heading}>AI Digest</Heading>
+          <Section style={logoContainer}>
+            <Img
+              src={`${baseUrl}/logo.png`}
+              width="180"
+              height="45"
+              alt="explAI.in"
+              style={logo}
+            />
+          </Section>
           <Text style={paragraph}>
-            Thanks for signing up for AI Digest! Please confirm your email
+            Thanks for signing up for explAI.in! Please confirm your email
             address to start receiving your personalized AI news digest.
           </Text>
           <Section style={buttonContainer}>
@@ -36,7 +45,7 @@ export const VerificationEmail = ({
             </Button>
           </Section>
           <Text style={paragraph}>
-            If you didn&apos;t sign up for AI Digest, you can safely ignore this
+            If you didn&apos;t sign up for explAI.in, you can safely ignore this
             email.
           </Text>
           <Text style={footer}>
@@ -64,12 +73,13 @@ const container = {
   borderRadius: '8px',
 };
 
-const heading = {
-  color: '#2D2D2D',
-  fontSize: '28px',
-  fontWeight: '700',
+const logoContainer = {
   textAlign: 'center' as const,
-  margin: '0 0 24px',
+  marginBottom: '24px',
+};
+
+const logo = {
+  margin: '0 auto',
 };
 
 const paragraph = {
