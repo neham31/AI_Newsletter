@@ -2,19 +2,19 @@
   "crons": [
     {
       "path": "/api/ingest/process-emails",
-      "schedule": "*/5 * * * *"
+      "schedule": "0 6 * * *"
     },
     {
       "path": "/api/ingest/rss",
-      "schedule": "0 */2 * * *"
+      "schedule": "30 6 * * *"
     },
     {
       "path": "/api/digest/send?frequency=daily",
-      "schedule": "30 2 * * *"
+      "schedule": "0 7 * * *"
     },
     {
       "path": "/api/digest/send?frequency=weekly",
-      "schedule": "30 2 * * 1"
+      "schedule": "0 7 * * 1"
     }
   ]
 }
