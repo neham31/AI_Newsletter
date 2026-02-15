@@ -1,0 +1,20 @@
+{
+  "crons": [
+    {
+      "path": "/api/ingest/process-emails",
+      "schedule": "*/5 * * * *"
+    },
+    {
+      "path": "/api/ingest/rss",
+      "schedule": "0 */2 * * *"
+    },
+    {
+      "path": "/api/digest/send?frequency=daily",
+      "schedule": "30 2 * * *"
+    },
+    {
+      "path": "/api/digest/send?frequency=weekly",
+      "schedule": "30 2 * * 1"
+    }
+  ]
+}

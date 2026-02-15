@@ -3,7 +3,11 @@ import { randomUUID } from 'crypto';
 import { createClient } from '@/lib/supabase/server';
 import { sendEmail } from '@/lib/email/resend';
 import { VerificationEmail } from '@/emails/VerificationEmail';
+import { createSubscribeRateLimiter, checkRateLimit, getClientIp } from '@/lib/ratelimit';
 import type { Frequency } from '@/types/database';
+
+// Initialize rate limiter (singleton)
+const rateLimiter = createSubscribeRateLimiter();
 
 /** Request body for subscribe endpoint */
 interface SubscribeRequest {
@@ -124,6 +128,24 @@ async function validateSources(
 
 export async function POST(request: NextRequest) {
   try {
+    // Check rate limit
+    const clientIp = getClientIp(request);
+    const rateLimitResult = await checkRateLimit(rateLimiter, clientIp);
+
+    if (!rateLimitResult.success) {
+      return NextResponse.json(
+        { error: 'Too many requests. Please try again later.' },
+        {
+          status: 429,
+          headers: {
+            'X-RateLimit-Limit': rateLimitResult.limit.toString(),
+            'X-RateLimit-Remaining': rateLimitResult.remaining.toString(),
+            'X-RateLimit-Reset': rateLimitResult.reset.toString(),
+          },
+        }
+      );
+    }
+
     // Parse request body
     let body: SubscribeRequest;
     try {

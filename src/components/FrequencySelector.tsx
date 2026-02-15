@@ -25,7 +25,7 @@ export function FrequencySelector({ value, onChange }: FrequencySelectorProps) {
 
   return (
     <div className="space-y-3">
-      <div className="flex gap-2" role="radiogroup" aria-label="Email frequency">
+      <div className="flex flex-col sm:flex-row gap-2" role="radiogroup" aria-label="Email frequency">
         {frequencyOptions.map((option) => {
           const isSelected = value === option.value
           return (
