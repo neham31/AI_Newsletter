@@ -1,30 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { processEmails } from '@/lib/jobs/processEmails';
-
-/**
- * Validates the cron secret to ensure only authorized calls
- */
-function validateCronSecret(request: NextRequest): boolean {
-  const cronSecret = process.env.CRON_SECRET;
-  if (!cronSecret) {
-    console.warn('CRON_SECRET not configured');
-    return false;
-  }
-
-  // Check authorization header
-  const authHeader = request.headers.get('authorization');
-  if (authHeader === `Bearer ${cronSecret}`) {
-    return true;
-  }
-
-  // Also check x-cron-secret header (Vercel cron)
-  const cronHeader = request.headers.get('x-cron-secret');
-  if (cronHeader === cronSecret) {
-    return true;
-  }
-
-  return false;
-}
+import { validateCronSecret } from '@/lib/auth/cron';
 
 /**
  * POST /api/ingest/process-emails

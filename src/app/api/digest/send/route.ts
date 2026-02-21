@@ -1,29 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { sendDigests } from '@/lib/jobs/sendDigests';
 import type { Frequency } from '@/types/database';
-
-/**
- * Validates the cron secret to ensure only authorized calls
- */
-function validateCronSecret(request: NextRequest): boolean {
-  const cronSecret = process.env.CRON_SECRET;
-  if (!cronSecret) {
-    console.warn('CRON_SECRET not configured');
-    return false;
-  }
-
-  const authHeader = request.headers.get('authorization');
-  if (authHeader === `Bearer ${cronSecret}`) {
-    return true;
-  }
-
-  const cronHeader = request.headers.get('x-cron-secret');
-  if (cronHeader === cronSecret) {
-    return true;
-  }
-
-  return false;
-}
+import { validateCronSecret } from '@/lib/auth/cron';
 
 /**
  * POST /api/digest/send
