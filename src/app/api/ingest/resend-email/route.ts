@@ -68,19 +68,25 @@ async function fetchEmailContent(emailId: string): Promise<ResendEmailContent> {
 export async function POST(request: NextRequest) {
   try {
     // Parse JSON body (Resend sends application/json)
-    let payload: ResendWebhookPayload;
+    let rawPayload: unknown;
     try {
-      payload = await request.json();
+      rawPayload = await request.json();
     } catch {
-      console.error('Invalid JSON payload');
+      console.error('[RESEND WEBHOOK] Invalid JSON payload');
       return NextResponse.json(
         { error: 'Invalid JSON payload' },
         { status: 400 }
       );
     }
 
+    // Log the entire raw payload for debugging
+    console.log('[RESEND WEBHOOK] Raw payload:', JSON.stringify(rawPayload, null, 2));
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const payload = rawPayload as any;
+
     // Log the webhook type for debugging
-    console.log(`[RESEND WEBHOOK] Received event type: ${payload.type}`);
+    console.log(`[RESEND WEBHOOK] Received event type: ${payload?.type}`);
 
     // Only process email.received events
     if (payload.type !== 'email.received') {
