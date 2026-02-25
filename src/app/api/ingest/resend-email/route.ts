@@ -110,7 +110,7 @@ export async function POST(request: NextRequest) {
     if (!recipient) {
       console.error('[RESEND WEBHOOK] Missing recipient');
       return NextResponse.json(
-        { error: 'Missing recipient' },
+        { error: 'Missing recipient (resend-email route)' },
         { status: 400 }
       );
     }
