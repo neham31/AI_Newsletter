@@ -82,8 +82,7 @@ export async function POST(request: NextRequest) {
     // Log the entire raw payload for debugging
     console.log('[RESEND WEBHOOK] Raw payload:', JSON.stringify(rawPayload, null, 2));
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const payload = rawPayload as any;
+    const payload = rawPayload as ResendWebhookPayload;
 
     // Log the webhook type for debugging
     console.log(`[RESEND WEBHOOK] Received event type: ${payload?.type}`);
