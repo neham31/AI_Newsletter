@@ -2,27 +2,63 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createServiceRoleClient } from '@/lib/supabase/server';
 
 /**
- * Resend inbound email webhook payload
+ * Resend webhook payload wrapper
  * @see https://resend.com/docs/dashboard/webhooks/event-types#email-received
  */
-interface ResendInboundPayload {
-  from: string;
-  to: string | string[];
-  subject: string;
-  html?: string;
-  text?: string;
-  headers?: Array<{ name: string; value: string }>;
+interface ResendWebhookPayload {
+  type: string;
+  created_at: string;
+  data: {
+    email_id: string;
+    from: string;
+    to: string[];
+    cc?: string[];
+    bcc?: string[];
+    subject: string;
+    message_id?: string;
+    created_at: string;
+  };
 }
 
 /**
- * Extract Message-ID from headers array
+ * Resend email content from API
  */
-function getMessageId(headers?: Array<{ name: string; value: string }>): string | null {
-  if (!headers) return null;
-  const messageIdHeader = headers.find(
-    (h) => h.name.toLowerCase() === 'message-id'
-  );
-  return messageIdHeader?.value || null;
+interface ResendEmailContent {
+  html?: string;
+  text?: string;
+}
+
+/**
+ * Fetch email content from Resend API
+ */
+async function fetchEmailContent(emailId: string): Promise<ResendEmailContent> {
+  const apiKey = process.env.RESEND_API_KEY;
+  if (!apiKey) {
+    console.error('RESEND_API_KEY not configured');
+    return {};
+  }
+
+  try {
+    const response = await fetch(`https://api.resend.com/emails/${emailId}`, {
+      headers: {
+        'Authorization': `Bearer ${apiKey}`,
+      },
+    });
+
+    if (!response.ok) {
+      console.error(`Failed to fetch email content: ${response.status}`);
+      return {};
+    }
+
+    const data = await response.json();
+    return {
+      html: data.html || '',
+      text: data.text || '',
+    };
+  } catch (error) {
+    console.error('Error fetching email content:', error);
+    return {};
+  }
 }
 
 /**
@@ -32,7 +68,7 @@ function getMessageId(headers?: Array<{ name: string; value: string }>): string 
 export async function POST(request: NextRequest) {
   try {
     // Parse JSON body (Resend sends application/json)
-    let payload: ResendInboundPayload;
+    let payload: ResendWebhookPayload;
     try {
       payload = await request.json();
     } catch {
@@ -43,18 +79,38 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { from, to, subject, html, text, headers } = payload;
+    // Log the webhook type for debugging
+    console.log(`[RESEND WEBHOOK] Received event type: ${payload.type}`);
 
-    // Get recipient (can be string or array)
+    // Only process email.received events
+    if (payload.type !== 'email.received') {
+      console.log(`[RESEND WEBHOOK] Ignoring event type: ${payload.type}`);
+      return NextResponse.json({ received: true, ignored: true });
+    }
+
+    const { data } = payload;
+    if (!data) {
+      console.error('[RESEND WEBHOOK] Missing data in payload');
+      return NextResponse.json(
+        { error: 'Missing data in payload' },
+        { status: 400 }
+      );
+    }
+
+    const { email_id, from, to, subject, message_id } = data;
+
+    // Get recipient (first in array)
     const recipient = Array.isArray(to) ? to[0] : to;
 
     if (!recipient) {
-      console.error('Missing recipient');
+      console.error('[RESEND WEBHOOK] Missing recipient');
       return NextResponse.json(
         { error: 'Missing recipient' },
         { status: 400 }
       );
     }
+
+    console.log(`[RESEND WEBHOOK] Processing email to: ${recipient}, from: ${from}, subject: ${subject}`);
 
     const supabase = createServiceRoleClient();
 
@@ -77,24 +133,26 @@ export async function POST(request: NextRequest) {
     }
 
     // Check for duplicate by message_id
-    const messageId = getMessageId(headers);
-    if (messageId) {
+    if (message_id) {
       const { data: existing } = await supabase
         .from('raw_emails')
         .select('id')
-        .eq('message_id', messageId)
+        .eq('message_id', message_id)
         .single();
 
       if (existing) {
-        console.log(`Duplicate email skipped: ${messageId}`);
+        console.log(`Duplicate email skipped: ${message_id}`);
         await supabase.from('ingestion_log').insert({
           source_id: source.id,
           type: 'duplicate_skipped',
-          details: { message_id: messageId, reason: 'duplicate_email' },
+          details: { message_id: message_id, reason: 'duplicate_email' },
         });
         return NextResponse.json({ received: true, duplicate: true });
       }
     }
+
+    // Fetch email content from Resend API
+    const emailContent = await fetchEmailContent(email_id);
 
     // Queue email for processing
     const { error: insertError } = await supabase.from('raw_emails').insert({
@@ -102,9 +160,9 @@ export async function POST(request: NextRequest) {
       recipient: recipient.toLowerCase(),
       sender: from || '',
       subject: subject || '',
-      body_html: html || '',
-      body_plain: text || '',
-      message_id: messageId,
+      body_html: emailContent.html || '',
+      body_plain: emailContent.text || '',
+      message_id: message_id || null,
       processed: false,
     });
 
@@ -121,7 +179,7 @@ export async function POST(request: NextRequest) {
       source_id: source.id,
       type: 'email_received',
       details: {
-        message_id: messageId,
+        message_id: message_id,
         subject: subject,
         sender: from,
       },
