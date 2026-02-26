@@ -24,6 +24,46 @@ interface ResendWebhookPayload {
 }
 
 /**
+ * Fetch email content from Resend API
+ * For inbound emails, content must be fetched via API - it's not in the webhook payload
+ */
+async function fetchEmailContent(emailId: string): Promise<{ html: string; text: string }> {
+  const apiKey = process.env.RESEND_API_KEY;
+  if (!apiKey) {
+    console.error('[RESEND WEBHOOK] RESEND_API_KEY not configured');
+    return { html: '', text: '' };
+  }
+
+  try {
+    console.log(`[RESEND WEBHOOK] Fetching content for email: ${emailId}`);
+    const response = await fetch(`https://api.resend.com/emails/${emailId}`, {
+      headers: {
+        'Authorization': `Bearer ${apiKey}`,
+      },
+    });
+
+    console.log(`[RESEND WEBHOOK] API response status: ${response.status}`);
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error(`[RESEND WEBHOOK] Failed to fetch email content: ${response.status} - ${errorText}`);
+      return { html: '', text: '' };
+    }
+
+    const data = await response.json();
+    console.log(`[RESEND WEBHOOK] API response keys: ${Object.keys(data).join(', ')}`);
+
+    return {
+      html: data.html || data.body || '',
+      text: data.text || '',
+    };
+  } catch (error) {
+    console.error('[RESEND WEBHOOK] Error fetching email content:', error);
+    return { html: '', text: '' };
+  }
+}
+
+/**
  * POST /api/ingest/resend-email
  * Resend inbound webhook endpoint for receiving newsletter emails
  */
@@ -64,7 +104,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { from, to, subject, message_id, html, text } = data;
+    const { email_id, from, to, subject, message_id } = data;
 
     // Get recipient (first in array)
     const recipient: string | undefined = Array.isArray(to) ? to[0] : to;
@@ -118,17 +158,18 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Log content availability for debugging
-    console.log(`[RESEND WEBHOOK] Content available - HTML: ${html ? html.length : 0} chars, Text: ${text ? text.length : 0} chars`);
+    // Fetch email content from Resend API (not included in webhook payload)
+    const emailContent = await fetchEmailContent(email_id);
+    console.log(`[RESEND WEBHOOK] Content fetched - HTML: ${emailContent.html.length} chars, Text: ${emailContent.text.length} chars`);
 
-    // Queue email for processing (use content directly from webhook payload)
+    // Queue email for processing
     const { error: insertError } = await supabase.from('raw_emails').insert({
       source_id: source.id,
       recipient: recipient.toLowerCase(),
       sender: from || '',
       subject: subject || '',
-      body_html: html || '',
-      body_plain: text || '',
+      body_html: emailContent.html,
+      body_plain: emailContent.text,
       message_id: message_id || null,
       processed: false,
     });
