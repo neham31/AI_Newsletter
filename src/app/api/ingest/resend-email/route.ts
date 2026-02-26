@@ -17,48 +17,10 @@ interface ResendWebhookPayload {
     subject: string;
     message_id?: string;
     created_at: string;
+    // Inbound email content fields
+    html?: string;
+    text?: string;
   };
-}
-
-/**
- * Resend email content from API
- */
-interface ResendEmailContent {
-  html?: string;
-  text?: string;
-}
-
-/**
- * Fetch email content from Resend API
- */
-async function fetchEmailContent(emailId: string): Promise<ResendEmailContent> {
-  const apiKey = process.env.RESEND_API_KEY;
-  if (!apiKey) {
-    console.error('RESEND_API_KEY not configured');
-    return {};
-  }
-
-  try {
-    const response = await fetch(`https://api.resend.com/emails/${emailId}`, {
-      headers: {
-        'Authorization': `Bearer ${apiKey}`,
-      },
-    });
-
-    if (!response.ok) {
-      console.error(`Failed to fetch email content: ${response.status}`);
-      return {};
-    }
-
-    const data = await response.json();
-    return {
-      html: data.html || '',
-      text: data.text || '',
-    };
-  } catch (error) {
-    console.error('Error fetching email content:', error);
-    return {};
-  }
 }
 
 /**
@@ -102,7 +64,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { email_id, from, to, subject, message_id } = data;
+    const { from, to, subject, message_id, html, text } = data;
 
     // Get recipient (first in array)
     const recipient: string | undefined = Array.isArray(to) ? to[0] : to;
@@ -156,17 +118,17 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Fetch email content from Resend API
-    const emailContent = await fetchEmailContent(email_id);
+    // Log content availability for debugging
+    console.log(`[RESEND WEBHOOK] Content available - HTML: ${html ? html.length : 0} chars, Text: ${text ? text.length : 0} chars`);
 
-    // Queue email for processing
+    // Queue email for processing (use content directly from webhook payload)
     const { error: insertError } = await supabase.from('raw_emails').insert({
       source_id: source.id,
       recipient: recipient.toLowerCase(),
       sender: from || '',
       subject: subject || '',
-      body_html: emailContent.html || '',
-      body_plain: emailContent.text || '',
+      body_html: html || '',
+      body_plain: text || '',
       message_id: message_id || null,
       processed: false,
     });
