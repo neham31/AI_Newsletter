@@ -1,4 +1,15 @@
 {
+  "functions": {
+    "src/app/api/ingest/process-emails/route.ts": {
+      "maxDuration": 300
+    },
+    "src/app/api/digest/send/route.ts": {
+      "maxDuration": 300
+    },
+    "src/app/api/ingest/rss/route.ts": {
+      "maxDuration": 300
+    }
+  },
   "crons": [
     {
       "path": "/api/ingest/process-emails",
