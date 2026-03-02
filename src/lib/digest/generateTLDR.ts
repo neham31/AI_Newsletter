@@ -44,7 +44,7 @@ Return ONLY a JSON array of strings, no other text. Example: ["Takeaway 1", "Tak
 
     // Create the API call promise
     const apiPromise = anthropic.messages.create({
-      model: 'claude-3-5-haiku-20241022',
+      model: 'claude-3-haiku-20240307',
       max_tokens: 512,
       system: systemPrompt,
       messages: [
