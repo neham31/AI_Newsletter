@@ -65,8 +65,8 @@ export async function sendDigests(
     return result;
   }
 
-  // Generate a batch ID for this run
-  const batchId = `${frequency}-${new Date().toISOString()}`;
+  // Generate a batch ID for this run (UUID format)
+  const batchId = crypto.randomUUID();
 
   // Process users with rate limiting (10 emails/second = 100ms between emails)
   for (const user of users) {
