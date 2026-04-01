@@ -278,10 +278,12 @@ export async function POST(request: NextRequest) {
         });
       }
 
-      // Insert into waitlist
-      const { error: insertError } = await supabase
+      // Insert into waitlist and return created_at for position calculation
+      const { data: newWaitlistEntry, error: insertError } = await supabase
         .from('waitlist')
-        .insert({ email: normalizedEmail });
+        .insert({ email: normalizedEmail })
+        .select('created_at')
+        .single();
 
       if (insertError) {
         console.error('Error inserting into waitlist:', insertError);
@@ -291,13 +293,14 @@ export async function POST(request: NextRequest) {
         );
       }
 
-      // Get position (count of entries in waitlist)
-      const { count: waitlistCount, error: waitlistCountError } = await supabase
+      // Get position: count entries with created_at <= this entry's created_at
+      const { count: position, error: positionError } = await supabase
         .from('waitlist')
-        .select('*', { count: 'exact', head: true });
+        .select('*', { count: 'exact', head: true })
+        .lte('created_at', newWaitlistEntry.created_at);
 
-      if (waitlistCountError) {
-        console.error('Error counting waitlist:', waitlistCountError);
+      if (positionError) {
+        console.error('Error calculating waitlist position:', positionError);
         // Still return success, just with position 0
         return NextResponse.json({
           waitlisted: true,
@@ -308,7 +311,7 @@ export async function POST(request: NextRequest) {
 
       return NextResponse.json({
         waitlisted: true,
-        position: waitlistCount ?? 1,
+        position: position ?? 1,
         message: 'You\'ve been added to the waitlist!',
       });
     }
