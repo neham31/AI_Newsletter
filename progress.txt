@@ -718,3 +718,17 @@ AI News Aggregator & Newsletter Platform - Curated AI news from top newsletters 
   - Email link visibility: react-email `<Link>` elements need explicit color and textDecoration since email clients strip default browser link styles
   - Footer links already had lavender + underline — headline links were missing the same treatment
 ---
+
+## 2026-04-01 - US-067
+- **Implemented:** Fix TLDR truncation and cache takeaways per batch
+- **Files changed:**
+  - src/emails/DigestEmail.tsx (replace nested <span> bullet with plain text `• ${takeaway}`; remove tldrBullet style)
+  - src/lib/digest/sendDigest.ts (accept keyTakeaways as parameter instead of calling generateTLDR per-user)
+  - src/lib/jobs/sendDigests.ts (generate TLDR once before user loop; check/populate digest_cache table)
+  - supabase/migrations/20260401000001_create_digest_cache_table.sql (new: digest_cache table with cache_key unique index)
+- **Learnings for future iterations:**
+  - React Email <Text> elements do not support nested <span> children in all email clients — use template literals for inline text instead
+  - digest_cache table uses cache_key format `{YYYY-MM-DD}-{frequency}` (e.g. '2026-04-01-daily') for batch deduplication
+  - When moving per-user logic to batch level, pass the result as a parameter to lower-level functions rather than re-computing in each call
+  - Supabase `.single()` returns null data (not error) when no row found — safe to check `if (cachedEntry)` without error handling
+---

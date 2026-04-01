@@ -623,7 +623,7 @@
         "Typecheck passes"
       ],
       "priority": 3,
-      "passes": false,
+      "passes": true,
       "notes": "P1. Two fixes in one: (1) truncation caused by span-in-Text rendering in email clients, (2) cost reduction by generating TLDR once per batch not per user."
     },
     {
