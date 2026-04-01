@@ -700,3 +700,12 @@ AI News Aggregator & Newsletter Platform - Curated AI news from top newsletters 
   - Fetch all sources from /api/sources (not just subscribed ones) so user can change selections
   - Initialize selectedSourceIds from preferences API response, not from sources API
 ---
+
+## 2026-04-01 - US-065
+- What was implemented: Fixed `normalizeUrl` in `src/lib/utils/url.ts` to only lowercase the hostname, not the full URL. Also made tracking param removal case-insensitive (handles `UTM_SOURCE`, `UTM_MEDIUM`, etc.)
+- Files changed: `src/lib/utils/url.ts`
+- **Learnings for future iterations:**
+  - `normalizeUrl` previously called `url.toLowerCase()` before parsing, corrupting case-sensitive path tokens (e.g., newsletter redirect tokens like `/AbCdEf`)
+  - Fix: `new URL(url)` then `parsed.hostname = parsed.hostname.toLowerCase()`
+  - Tracking param stripping now uses `key.toLowerCase()` for case-insensitive comparison
+---
