@@ -1,6 +1,7 @@
 import { createServiceRoleClient } from '@/lib/supabase/server';
 import { getUnsentArticles } from '@/lib/digest/getUnsentArticles';
 import { sendDigest } from '@/lib/digest/sendDigest';
+import { generateTLDR } from '@/lib/digest/generateTLDR';
 import type { Frequency } from '@/types/database';
 
 /**
@@ -68,6 +69,38 @@ export async function sendDigests(
   // Generate a batch ID for this run (UUID format)
   const batchId = crypto.randomUUID();
 
+  // Generate TLDR once for the whole batch (cached by date+frequency)
+  const today = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
+  const cacheKey = `${today}-${frequency}`;
+
+  let batchTakeaways: string[] = [];
+
+  const { data: cachedEntry } = await supabase
+    .from('digest_cache')
+    .select('takeaways')
+    .eq('cache_key', cacheKey)
+    .single();
+
+  if (cachedEntry) {
+    batchTakeaways = cachedEntry.takeaways;
+  } else {
+    // Fetch a sample of today's articles for TLDR generation
+    const { data: todayArticles } = await supabase
+      .from('articles')
+      .select('headline, summary')
+      .gte('ingested_at', `${today}T00:00:00Z`)
+      .order('ingested_at', { ascending: false })
+      .limit(30);
+
+    if (todayArticles && todayArticles.length > 0) {
+      batchTakeaways = await generateTLDR(todayArticles);
+
+      await supabase
+        .from('digest_cache')
+        .insert({ cache_key: cacheKey, takeaways: batchTakeaways });
+    }
+  }
+
   // Process users with rate limiting (10 emails/second = 100ms between emails)
   for (const user of users) {
     result.usersProcessed++;
@@ -95,7 +128,8 @@ export async function sendDigests(
       const sendResult = await sendDigest(
         user.email,
         user.unsubscribe_token,
-        groupedArticles
+        groupedArticles,
+        batchTakeaways
       );
 
       if (!sendResult.success) {

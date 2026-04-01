@@ -66,7 +66,7 @@ export function DigestEmail({
               <Text style={styles.tldrHeading}>Key Takeaways</Text>
               {keyTakeaways.map((takeaway, index) => (
                 <Text key={index} style={styles.tldrItem}>
-                  <span style={styles.tldrBullet}>•</span> {takeaway}
+                  {`• ${takeaway}`}
                 </Text>
               ))}
             </Section>
@@ -180,11 +180,6 @@ const styles = {
     color: '#2D2D2D',
     lineHeight: '1.6',
     margin: '0 0 10px 0',
-  },
-  tldrBullet: {
-    color: '#B8A9E8',
-    fontWeight: 'bold' as const,
-    marginRight: '8px',
   },
   sourceSection: {
     marginBottom: '24px',

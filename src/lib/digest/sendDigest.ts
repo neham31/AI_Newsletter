@@ -1,7 +1,6 @@
 import { sendEmail } from '@/lib/email/resend';
 import { DigestEmail } from '@/emails/DigestEmail';
 import type { GroupedArticles } from './getUnsentArticles';
-import { generateTLDR } from './generateTLDR';
 
 /**
  * Result of sending a digest email
@@ -23,7 +22,8 @@ export interface SendDigestResult {
 export async function sendDigest(
   userEmail: string,
   unsubscribeToken: string,
-  groupedArticles: GroupedArticles[]
+  groupedArticles: GroupedArticles[],
+  keyTakeaways: string[] = []
 ): Promise<SendDigestResult> {
   // Calculate total article count
   const articleCount = groupedArticles.reduce(
@@ -54,14 +54,6 @@ export async function sendDigest(
 
   // Build subject line
   const subject = `Your explAI.in Digest - ${today.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} (${articleCount} ${articleCount === 1 ? 'story' : 'stories'})`;
-
-  // Flatten articles for TL;DR generation
-  const allArticles = groupedArticles.flatMap((group) =>
-    group.articles.map((a) => ({ headline: a.headline, summary: a.summary }))
-  );
-
-  // Generate key takeaways (graceful degradation on failure)
-  const keyTakeaways = await generateTLDR(allArticles);
 
   // Send email
   const result = await sendEmail({
