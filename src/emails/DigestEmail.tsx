@@ -201,8 +201,8 @@ const styles = {
   headline: {
     fontSize: '16px',
     fontWeight: '600' as const,
-    color: '#2D2D2D',
-    textDecoration: 'none',
+    color: '#B8A9E8',
+    textDecoration: 'underline',
     display: 'block',
     marginBottom: '8px',
   },
