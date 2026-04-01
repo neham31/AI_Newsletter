@@ -580,6 +580,85 @@
       "notes": ""
     },
     {
+      "id": "US-065",
+      "title": "Fix URL normalization - preserve path case to fix broken redirect links",
+      "description": "As a developer, I need to fix a critical bug where normalizeUrl lowercases the entire URL including the path. Newsletter redirect links (e.g., https://links.tldrnewsletter.com/AbCdEf) are case-sensitive tokens that get corrupted when lowercased, causing 404s. Only the hostname should be lowercased.",
+      "acceptanceCriteria": [
+        "In src/lib/utils/url.ts, change normalizeUrl to only lowercase the hostname, not the full URL",
+        "Path, query string, and fragment case must be preserved",
+        "normalizeUrl('https://LINKS.tldrnewsletter.com/AbCdEf?UTM_SOURCE=email') returns 'https://links.tldrnewsletter.com/AbCdEf' (hostname lowercased, path preserved, utm stripped)",
+        "Existing tracking param stripping and www removal still work",
+        "Typecheck passes"
+      ],
+      "priority": 1,
+      "passes": false,
+      "notes": "P1 critical bug. Affects all newsletter redirect links. Fix: parse URL, lowercase only parsed.hostname, do not call url.toLowerCase() on the full URL string before parsing."
+    },
+    {
+      "id": "US-066",
+      "title": "Fix digest email link styling - make headlines visually clickable",
+      "description": "As a subscriber, I want article headlines in my digest email to clearly look like clickable links so I know I can click them to read the full article.",
+      "acceptanceCriteria": [
+        "In src/emails/DigestEmail.tsx, change headline style color from '#2D2D2D' to '#B8A9E8' (brand lavender)",
+        "Change headline style textDecoration from 'none' to 'underline'",
+        "All article headlines in the digest email are visually distinguishable as links",
+        "Footer links (Manage preferences, Unsubscribe) retain their existing lavender styling",
+        "Typecheck passes"
+      ],
+      "priority": 2,
+      "passes": false,
+      "notes": "P1 UX bug. Links exist in HTML but are invisible - same color as body text with no underline. Simple 2-line style change."
+    },
+    {
+      "id": "US-067",
+      "title": "Fix TLDR truncation and cache takeaways per batch",
+      "description": "As a subscriber, I want the Key Takeaways section to display complete, untruncated text. As a developer, I want TLDR to be generated once per digest run and reused for all users to reduce Claude API costs.",
+      "acceptanceCriteria": [
+        "Fix truncation: in DigestEmail.tsx, replace nested <span> bullet with plain text bullet character directly in the string (e.g., `\u2022 ${takeaway}` as a single Text element with no nested span). Remove tldrBullet span style entirely.",
+        "Cache TLDR: add a digest_cache table via migration with columns: id (uuid PK), cache_key (text unique), takeaways (text array), created_at",
+        "In sendDigests.ts, generate TLDR once before the user loop using a cache_key of format `{date}-{frequency}` (e.g., '2026-04-01-daily')",
+        "Check digest_cache for existing entry before calling generateTLDR",
+        "Store result in digest_cache after generation",
+        "Pass same takeaways to all users in the batch",
+        "Typecheck passes"
+      ],
+      "priority": 3,
+      "passes": false,
+      "notes": "P1. Two fixes in one: (1) truncation caused by span-in-Text rendering in email clients, (2) cost reduction by generating TLDR once per batch not per user."
+    },
+    {
+      "id": "US-068",
+      "title": "Fix raw_emails migration and verify subscriber cap counter",
+      "description": "As a developer, I need to ensure the raw_emails table has a proper migration file (it is used in code but may be missing from migrations), and verify the subscriber cap counter and waitlist position logic work correctly.",
+      "acceptanceCriteria": [
+        "Check if supabase/migrations/ has a migration for raw_emails table. If missing, create it: raw_emails with columns id (uuid PK), source_id (FK to sources), recipient (text), sender (text), subject (text), body_html (text), body_plain (text), message_id (text unique), received_at (timestamptz), processed (boolean default false), created_at (timestamptz default now())",
+        "Audit src/app/api/subscription-status/route.ts: verify it counts only is_active=true AND email_verified=true users against the cap",
+        "Fix waitlist position in src/app/api/subscribe/route.ts: query COUNT(*) from waitlist WHERE created_at <= (SELECT created_at FROM waitlist WHERE email = $1) to get accurate position",
+        "Typecheck passes"
+      ],
+      "priority": 4,
+      "passes": false,
+      "notes": "P1. raw_emails table may have been created manually in Supabase. Waitlist position currently uses total count not position-relative count."
+    },
+    {
+      "id": "US-069",
+      "title": "Weekly digest: themes-only AI summary with no individual article links",
+      "description": "As a weekly subscriber, I want my digest to be a clean AI-generated thematic summary of the week's most important AI stories \u2014 organized by theme with cross-source coverage noted \u2014 with NO individual article list or backlinks. Weekly is a summary format, not a curated article list.",
+      "acceptanceCriteria": [
+        "Add generateWeeklySummary function in src/lib/digest/generateWeeklySummary.ts that takes all articles for the week and returns: { themes: Array<{ title: string, summary: string, sources: string[] }> }",
+        "Uses Claude Haiku with a prompt that: identifies 3-5 key themes from the week, writes 2-3 sentence summary per theme, notes which sources covered each theme (boosting themes mentioned across multiple sources), does NOT include individual article URLs",
+        "Create a new WeeklyDigestEmail.tsx template (separate from DigestEmail.tsx) that shows: header with logo and date range (e.g. 'Week of March 31'), story count ('N stories reviewed across your sources'), AI disclaimer note ('AI summaries may contain errors \u2014 verify important details at the source'), themes section with title + summary + source pills per theme, footer with unsubscribe/preferences links only (no article links)",
+        "In sendDigest.ts, detect if user frequency is 'weekly' and use WeeklyDigestEmail template instead of DigestEmail",
+        "Cache weekly summary in digest_cache table with cache_key format 'weekly-{YYYY-WW}'",
+        "Update FrequencySelector.tsx helper text for weekly option to: 'Every Monday \u2014 a curated AI summary of the week\\'s key themes. No individual article links.'",
+        "Update verify-success page text to differentiate: daily users see 'Your first digest arrives tomorrow morning', weekly users see 'Your first weekly summary arrives next Monday'",
+        "Typecheck passes"
+      ],
+      "priority": 5,
+      "passes": false,
+      "notes": "P1. Weekly = themes-only summary format. No article list, no backlinks. Cleaner for weekly cadence. AI disclaimer required. Separate email template from daily digest."
+    },
+    {
       "id": "US-040",
       "title": "Build preferences page - save functionality",
       "description": "As a user, I want to save changes to my preferences.",
@@ -958,85 +1037,6 @@
       "notes": ""
     },
     {
-      "id": "US-065",
-      "title": "Fix URL normalization - preserve path case to fix broken redirect links",
-      "description": "As a developer, I need to fix a critical bug where normalizeUrl lowercases the entire URL including the path. Newsletter redirect links (e.g., https://links.tldrnewsletter.com/AbCdEf) are case-sensitive tokens that get corrupted when lowercased, causing 404s. Only the hostname should be lowercased.",
-      "acceptanceCriteria": [
-        "In src/lib/utils/url.ts, change normalizeUrl to only lowercase the hostname, not the full URL",
-        "Path, query string, and fragment case must be preserved",
-        "normalizeUrl('https://LINKS.tldrnewsletter.com/AbCdEf?UTM_SOURCE=email') returns 'https://links.tldrnewsletter.com/AbCdEf' (hostname lowercased, path preserved, utm stripped)",
-        "Existing tracking param stripping and www removal still work",
-        "Typecheck passes"
-      ],
-      "priority": 1,
-      "passes": false,
-      "notes": "P1 critical bug. Affects all newsletter redirect links. Fix: parse URL, lowercase only parsed.hostname, do not call url.toLowerCase() on the full URL string before parsing."
-    },
-    {
-      "id": "US-066",
-      "title": "Fix digest email link styling - make headlines visually clickable",
-      "description": "As a subscriber, I want article headlines in my digest email to clearly look like clickable links so I know I can click them to read the full article.",
-      "acceptanceCriteria": [
-        "In src/emails/DigestEmail.tsx, change headline style color from '#2D2D2D' to '#B8A9E8' (brand lavender)",
-        "Change headline style textDecoration from 'none' to 'underline'",
-        "All article headlines in the digest email are visually distinguishable as links",
-        "Footer links (Manage preferences, Unsubscribe) retain their existing lavender styling",
-        "Typecheck passes"
-      ],
-      "priority": 2,
-      "passes": false,
-      "notes": "P1 UX bug. Links exist in HTML but are invisible - same color as body text with no underline. Simple 2-line style change."
-    },
-    {
-      "id": "US-067",
-      "title": "Fix TLDR truncation and cache takeaways per batch",
-      "description": "As a subscriber, I want the Key Takeaways section to display complete, untruncated text. As a developer, I want TLDR to be generated once per digest run and reused for all users to reduce Claude API costs.",
-      "acceptanceCriteria": [
-        "Fix truncation: in DigestEmail.tsx, replace nested <span> bullet with plain text bullet character directly in the string (e.g., `• ${takeaway}` as a single Text element with no nested span). Remove tldrBullet span style entirely.",
-        "Cache TLDR: add a digest_cache table via migration with columns: id (uuid PK), cache_key (text unique), takeaways (text array), created_at",
-        "In sendDigests.ts, generate TLDR once before the user loop using a cache_key of format `{date}-{frequency}` (e.g., '2026-04-01-daily')",
-        "Check digest_cache for existing entry before calling generateTLDR",
-        "Store result in digest_cache after generation",
-        "Pass same takeaways to all users in the batch",
-        "Typecheck passes"
-      ],
-      "priority": 3,
-      "passes": false,
-      "notes": "P1. Two fixes in one: (1) truncation caused by span-in-Text rendering in email clients, (2) cost reduction by generating TLDR once per batch not per user."
-    },
-    {
-      "id": "US-068",
-      "title": "Fix raw_emails migration and verify subscriber cap counter",
-      "description": "As a developer, I need to ensure the raw_emails table has a proper migration file (it is used in code but may be missing from migrations), and verify the subscriber cap counter and waitlist position logic work correctly.",
-      "acceptanceCriteria": [
-        "Check if supabase/migrations/ has a migration for raw_emails table. If missing, create it: raw_emails with columns id (uuid PK), source_id (FK to sources), recipient (text), sender (text), subject (text), body_html (text), body_plain (text), message_id (text unique), received_at (timestamptz), processed (boolean default false), created_at (timestamptz default now())",
-        "Audit src/app/api/subscription-status/route.ts: verify it counts only is_active=true AND email_verified=true users against the cap",
-        "Fix waitlist position in src/app/api/subscribe/route.ts: query COUNT(*) from waitlist WHERE created_at <= (SELECT created_at FROM waitlist WHERE email = $1) to get accurate position",
-        "Typecheck passes"
-      ],
-      "priority": 4,
-      "passes": false,
-      "notes": "P1. raw_emails table may have been created manually in Supabase. Waitlist position currently uses total count not position-relative count."
-    },
-    {
-      "id": "US-069",
-      "title": "Weekly digest: themes-only AI summary with no individual article links",
-      "description": "As a weekly subscriber, I want my digest to be a clean AI-generated thematic summary of the week's most important AI stories — organized by theme with cross-source coverage noted — with NO individual article list or backlinks. Weekly is a summary format, not a curated article list.",
-      "acceptanceCriteria": [
-        "Add generateWeeklySummary function in src/lib/digest/generateWeeklySummary.ts that takes all articles for the week and returns: { themes: Array<{ title: string, summary: string, sources: string[] }> }",
-        "Uses Claude Haiku with a prompt that: identifies 3-5 key themes from the week, writes 2-3 sentence summary per theme, notes which sources covered each theme (boosting themes mentioned across multiple sources), does NOT include individual article URLs",
-        "Create a new WeeklyDigestEmail.tsx template (separate from DigestEmail.tsx) that shows: header with logo and date range (e.g. 'Week of March 31'), story count ('N stories reviewed across your sources'), AI disclaimer note ('AI summaries may contain errors — verify important details at the source'), themes section with title + summary + source pills per theme, footer with unsubscribe/preferences links only (no article links)",
-        "In sendDigest.ts, detect if user frequency is 'weekly' and use WeeklyDigestEmail template instead of DigestEmail",
-        "Cache weekly summary in digest_cache table with cache_key format 'weekly-{YYYY-WW}'",
-        "Update FrequencySelector.tsx helper text for weekly option to: 'Every Monday — a curated AI summary of the week\\'s key themes. No individual article links.'",
-        "Update verify-success page text to differentiate: daily users see 'Your first digest arrives tomorrow morning', weekly users see 'Your first weekly summary arrives next Monday'",
-        "Typecheck passes"
-      ],
-      "priority": 5,
-      "passes": false,
-      "notes": "P1. Weekly = themes-only summary format. No article list, no backlinks. Cleaner for weekly cadence. AI disclaimer required. Separate email template from daily digest."
-    },
-    {
       "id": "US-070",
       "title": "Admin dashboard - pipeline stats and subscriber overview",
       "description": "As the operator, I want a simple admin page at /admin showing subscriber counts, source breakdown, waitlist, and recent pipeline health so I can monitor the system without checking Vercel logs or Supabase directly.",
@@ -1114,16 +1114,16 @@
     },
     {
       "id": "US-075",
-      "title": "Fix Claude URL extraction — prefer redirect URLs over guessing original",
+      "title": "Fix Claude URL extraction \u2014 prefer redirect URLs over guessing original",
       "description": "As a developer, I need the Claude article extraction prompt updated to explicitly prefer the newsletter redirect URL rather than trying to infer the original article URL. Guessing the original URL leads to broken links, while redirect URLs work reliably (and are only broken by the now-fixed URL lowercasing bug in US-065).",
       "acceptanceCriteria": [
-        "In src/lib/ai/anthropic.ts, update the url field instruction in buildUserPrompt to: 'The direct link from the newsletter HTML (use the newsletter redirect URL as-is — do not try to guess or reconstruct the original article URL). If multiple links exist for an item, prefer the most specific one.'",
+        "In src/lib/ai/anthropic.ts, update the url field instruction in buildUserPrompt to: 'The direct link from the newsletter HTML (use the newsletter redirect URL as-is \u2014 do not try to guess or reconstruct the original article URL). If multiple links exist for an item, prefer the most specific one.'",
         "Remove the parenthetical '(not the newsletter link, but the underlying article/announcement)' which causes Claude to guess wrong URLs",
         "Typecheck passes"
       ],
       "priority": 70,
       "passes": false,
-      "notes": "P2. Bug 3 from gap analysis. Claude guesses original URLs from context — sometimes wrong. Newsletter redirect URLs are reliable as long as US-065 (case fix) is done first."
+      "notes": "P2. Bug 3 from gap analysis. Claude guesses original URLs from context \u2014 sometimes wrong. Newsletter redirect URLs are reliable as long as US-065 (case fix) is done first."
     },
     {
       "id": "US-076",
@@ -1131,7 +1131,7 @@
       "description": "As a subscriber using Outlook, I want article tags to render correctly. Currently tags use display:inline-block inside a React Email <Text> component which Outlook does not support, causing tags to stack vertically or render broken.",
       "acceptanceCriteria": [
         "In src/emails/DigestEmail.tsx, replace the tags <Text> + nested <span> approach with a React Email compatible layout",
-        "Use a <Row>/<Column> or plain comma-separated text fallback: render tags as plain text joined by ' · ' (e.g. 'LLMs · Agents · Research') inside a single <Text> element with no nested spans",
+        "Use a <Row>/<Column> or plain comma-separated text fallback: render tags as plain text joined by ' \u00b7 ' (e.g. 'LLMs \u00b7 Agents \u00b7 Research') inside a single <Text> element with no nested spans",
         "Tag text should be muted (color: '#9B9B9B') and smaller (fontSize: '12px')",
         "Remove the tag and tags style objects that use display: inline-block",
         "Typecheck passes"
@@ -1168,7 +1168,7 @@
       ],
       "priority": 73,
       "passes": false,
-      "notes": "P2. Simple console logging of usage stats. No DB storage needed — Vercel logs capture these. Helps identify expensive newsletters."
+      "notes": "P2. Simple console logging of usage stats. No DB storage needed \u2014 Vercel logs capture these. Helps identify expensive newsletters."
     },
     {
       "id": "US-079",
@@ -1182,7 +1182,7 @@
       ],
       "priority": 74,
       "passes": false,
-      "notes": "P2. At current scale (10 newsletters/blogs × 10 articles/day = 100 articles/day = 36,500/year) the DB will grow significantly. ingestion_log grows even faster."
+      "notes": "P2. At current scale (10 newsletters/blogs \u00d7 10 articles/day = 100 articles/day = 36,500/year) the DB will grow significantly. ingestion_log grows even faster."
     }
   ]
 }
