@@ -29,7 +29,7 @@ const TRACKING_PARAMS = [
  * Normalizes a URL for deduplication purposes
  *
  * Operations:
- * - Converts to lowercase
+ * - Lowercases the hostname only (path/query/fragment case is preserved)
  * - Removes www. prefix from hostname
  * - Removes trailing slashes from pathname
  * - Removes URL fragments (#section)
@@ -41,8 +41,11 @@ const TRACKING_PARAMS = [
  */
 export function normalizeUrl(url: string): string {
   try {
-    // Parse the URL
-    const parsed = new URL(url.toLowerCase());
+    // Parse the URL (preserve original case for path/query/fragment)
+    const parsed = new URL(url);
+
+    // Only lowercase the hostname (paths may contain case-sensitive tokens)
+    parsed.hostname = parsed.hostname.toLowerCase();
 
     // Remove www. prefix from hostname
     if (parsed.hostname.startsWith('www.')) {
@@ -57,16 +60,12 @@ export function normalizeUrl(url: string): string {
     // Remove URL fragment
     parsed.hash = '';
 
-    // Remove tracking parameters
+    // Remove tracking parameters (case-insensitive matching)
     const searchParams = new URLSearchParams(parsed.search);
-    for (const param of TRACKING_PARAMS) {
-      searchParams.delete(param);
-    }
-
-    // Also remove any parameter starting with utm_
     const keysToDelete: string[] = [];
     searchParams.forEach((_, key) => {
-      if (key.startsWith('utm_')) {
+      const keyLower = key.toLowerCase();
+      if (keyLower.startsWith('utm_') || TRACKING_PARAMS.includes(keyLower)) {
         keysToDelete.push(key);
       }
     });
@@ -82,8 +81,8 @@ export function normalizeUrl(url: string): string {
 
     return parsed.toString();
   } catch {
-    // If URL parsing fails, return the original (lowercased)
-    return url.toLowerCase();
+    // If URL parsing fails, return the original unchanged
+    return url;
   }
 }
 
