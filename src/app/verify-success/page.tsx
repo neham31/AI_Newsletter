@@ -2,7 +2,18 @@ import { Header } from '@/components/Header'
 import { Footer } from '@/components/Footer'
 import Link from 'next/link'
 
-export default function VerifySuccessPage() {
+interface VerifySuccessPageProps {
+  searchParams: Promise<{ frequency?: string }>
+}
+
+export default async function VerifySuccessPage({ searchParams }: VerifySuccessPageProps) {
+  const { frequency } = await searchParams
+  const isWeekly = frequency === 'weekly'
+
+  const firstDigestMessage = isWeekly
+    ? 'Your first weekly summary arrives next Monday.'
+    : 'Your first digest arrives tomorrow morning.'
+
   return (
     <main className="min-h-screen bg-cream">
       <div className="mx-auto max-w-3xl px-6 py-12">
@@ -35,7 +46,7 @@ export default function VerifySuccessPage() {
 
             {/* Message about first digest */}
             <p className="text-warm-gray mb-6">
-              Your email has been verified. Your first AI digest will arrive based on your selected frequency - daily subscribers receive their digest every morning, weekly subscribers receive theirs every Monday.
+              Your email has been verified. {firstDigestMessage}
             </p>
 
             {/* Link to manage preferences */}

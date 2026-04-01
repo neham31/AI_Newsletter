@@ -25,7 +25,7 @@ export async function GET(request: NextRequest) {
     // Look up user by verification_token
     const { data: user, error: lookupError } = await supabase
       .from('users')
-      .select('id, email_verified')
+      .select('id, email_verified, frequency')
       .eq('verification_token', token)
       .single();
 
@@ -40,6 +40,7 @@ export async function GET(request: NextRequest) {
     if (user.email_verified) {
       // Already verified - redirect to success page
       const redirectUrl = new URL('/verify-success', request.url);
+      redirectUrl.searchParams.set('frequency', user.frequency || 'daily');
       return NextResponse.redirect(redirectUrl);
     }
 
@@ -61,6 +62,7 @@ export async function GET(request: NextRequest) {
 
     // Success - redirect to verify-success page
     const redirectUrl = new URL('/verify-success', request.url);
+    redirectUrl.searchParams.set('frequency', user.frequency || 'daily');
     return NextResponse.redirect(redirectUrl);
   } catch (error) {
     console.error('Unexpected error in GET /api/verify:', error);

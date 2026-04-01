@@ -16,7 +16,7 @@ const frequencyOptions: { value: Frequency; label: string; description: string }
   {
     value: 'weekly',
     label: 'Weekly',
-    description: 'Get your digest every Monday at 8 AM IST',
+    description: "Every Monday — a curated AI summary of the week's key themes. No individual article links.",
   },
 ]
 
