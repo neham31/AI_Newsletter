@@ -1020,20 +1020,21 @@
     },
     {
       "id": "US-069",
-      "title": "Weekly digest: AI-generated thematic summary with importance scoring",
-      "description": "As a weekly subscriber, I want my digest to lead with a curated thematic summary of the week's most important AI stories, organized by theme with cross-source coverage noted, rather than just a flat list of articles.",
+      "title": "Weekly digest: themes-only AI summary with no individual article links",
+      "description": "As a weekly subscriber, I want my digest to be a clean AI-generated thematic summary of the week's most important AI stories — organized by theme with cross-source coverage noted — with NO individual article list or backlinks. Weekly is a summary format, not a curated article list.",
       "acceptanceCriteria": [
-        "Add generateWeeklySummary function in src/lib/digest/generateWeeklySummary.ts that takes all articles for the week and returns: { themes: Array<{ title: string, summary: string, sources: string[], articleIds: string[] }>, topArticleIds: string[] }",
-        "Uses Claude Haiku with a prompt that identifies 3-5 key themes, writes 2-3 sentence summary per theme, lists which sources covered each theme, and selects top 15 most important article IDs (boosting articles mentioned across multiple sources)",
-        "Add WeeklySummary section to DigestEmail.tsx that renders before articles when weeklyThemes prop is provided",
-        "Each theme shows: bold theme title, summary text, source attribution pills (e.g., 'TLDR AI • The Rundown AI')",
-        "In sendDigest.ts, when building digest for weekly users, call generateWeeklySummary and pass weeklyThemes to DigestEmail",
-        "Cache weekly summary in digest_cache table with cache_key format 'weekly-{YYYY-WW}' (year-week number)",
+        "Add generateWeeklySummary function in src/lib/digest/generateWeeklySummary.ts that takes all articles for the week and returns: { themes: Array<{ title: string, summary: string, sources: string[] }> }",
+        "Uses Claude Haiku with a prompt that: identifies 3-5 key themes from the week, writes 2-3 sentence summary per theme, notes which sources covered each theme (boosting themes mentioned across multiple sources), does NOT include individual article URLs",
+        "Create a new WeeklyDigestEmail.tsx template (separate from DigestEmail.tsx) that shows: header with logo and date range (e.g. 'Week of March 31'), story count ('N stories reviewed across your sources'), AI disclaimer note ('AI summaries may contain errors — verify important details at the source'), themes section with title + summary + source pills per theme, footer with unsubscribe/preferences links only (no article links)",
+        "In sendDigest.ts, detect if user frequency is 'weekly' and use WeeklyDigestEmail template instead of DigestEmail",
+        "Cache weekly summary in digest_cache table with cache_key format 'weekly-{YYYY-WW}'",
+        "Update FrequencySelector.tsx helper text for weekly option to: 'Every Monday — a curated AI summary of the week\\'s key themes. No individual article links.'",
+        "Update verify-success page text to differentiate: daily users see 'Your first digest arrives tomorrow morning', weekly users see 'Your first weekly summary arrives next Monday'",
         "Typecheck passes"
       ],
       "priority": 5,
       "passes": false,
-      "notes": "P1 new feature. Weekly users currently get same format as daily - not suitable for a week's worth of content. Theme-based summary is more scannable. Cross-source mention naturally surfaces importance."
+      "notes": "P1. Weekly = themes-only summary format. No article list, no backlinks. Cleaner for weekly cadence. AI disclaimer required. Separate email template from daily digest."
     },
     {
       "id": "US-070",
@@ -1096,6 +1097,92 @@
       "priority": 68,
       "passes": false,
       "notes": "P2. Plain text version improves spam score and is required by some email clients and accessibility tools."
+    },
+    {
+      "id": "US-074",
+      "title": "Fix CRON_SECRET missing causing 500 instead of 401",
+      "description": "As a developer, I need cron endpoints to return 401 Unauthorized when CRON_SECRET is missing from environment, not 500 Internal Server Error, so misconfiguration is diagnosable.",
+      "acceptanceCriteria": [
+        "In src/lib/auth/cron.ts, check if CRON_SECRET env var is defined at validation time",
+        "If CRON_SECRET is undefined/empty, return false from validateCronSecret (caller returns 401, not throw)",
+        "All cron endpoints (process-emails, rss, digest/send) return 401 with message 'Unauthorized' when secret is missing or wrong",
+        "Typecheck passes"
+      ],
+      "priority": 69,
+      "passes": false,
+      "notes": "P2 security. Currently if CRON_SECRET env var is not set, the comparison throws and returns 500. Should return 401."
+    },
+    {
+      "id": "US-075",
+      "title": "Fix Claude URL extraction — prefer redirect URLs over guessing original",
+      "description": "As a developer, I need the Claude article extraction prompt updated to explicitly prefer the newsletter redirect URL rather than trying to infer the original article URL. Guessing the original URL leads to broken links, while redirect URLs work reliably (and are only broken by the now-fixed URL lowercasing bug in US-065).",
+      "acceptanceCriteria": [
+        "In src/lib/ai/anthropic.ts, update the url field instruction in buildUserPrompt to: 'The direct link from the newsletter HTML (use the newsletter redirect URL as-is — do not try to guess or reconstruct the original article URL). If multiple links exist for an item, prefer the most specific one.'",
+        "Remove the parenthetical '(not the newsletter link, but the underlying article/announcement)' which causes Claude to guess wrong URLs",
+        "Typecheck passes"
+      ],
+      "priority": 70,
+      "passes": false,
+      "notes": "P2. Bug 3 from gap analysis. Claude guesses original URLs from context — sometimes wrong. Newsletter redirect URLs are reliable as long as US-065 (case fix) is done first."
+    },
+    {
+      "id": "US-076",
+      "title": "Fix email tag pills rendering in Outlook (React Email inline-block)",
+      "description": "As a subscriber using Outlook, I want article tags to render correctly. Currently tags use display:inline-block inside a React Email <Text> component which Outlook does not support, causing tags to stack vertically or render broken.",
+      "acceptanceCriteria": [
+        "In src/emails/DigestEmail.tsx, replace the tags <Text> + nested <span> approach with a React Email compatible layout",
+        "Use a <Row>/<Column> or plain comma-separated text fallback: render tags as plain text joined by ' · ' (e.g. 'LLMs · Agents · Research') inside a single <Text> element with no nested spans",
+        "Tag text should be muted (color: '#9B9B9B') and smaller (fontSize: '12px')",
+        "Remove the tag and tags style objects that use display: inline-block",
+        "Typecheck passes"
+      ],
+      "priority": 71,
+      "passes": false,
+      "notes": "P2. React Email <Text> components do not reliably support display:inline-block children. Outlook in particular breaks. Plain text comma/dot separated tags are universally safe."
+    },
+    {
+      "id": "US-077",
+      "title": "Email QA preview page for operator to review digest before send",
+      "description": "As the operator, I want a page at /admin/preview-digest that renders a live preview of what today's digest will look like for a given subscriber email, so I can QA the content and layout before the cron sends it.",
+      "acceptanceCriteria": [
+        "Create src/app/admin/preview-digest/page.tsx protected by ADMIN_SECRET",
+        "Page has a form: email input + 'Preview' button",
+        "On submit, fetch unsent articles for that user (same logic as sendDigest), render DigestEmail or WeeklyDigestEmail component, and display it inline in an iframe or styled div",
+        "Shows message if user email not found or no articles to send",
+        "Add link to this page from the /admin dashboard",
+        "Typecheck passes"
+      ],
+      "priority": 72,
+      "passes": false,
+      "notes": "P2. Currently no way to QA emails before they go out. Operator must wait for the cron to fire."
+    },
+    {
+      "id": "US-078",
+      "title": "Add token usage logging for Claude API calls",
+      "description": "As a developer, I want to log Claude API token usage (input tokens, output tokens, estimated cost) for each extraction and TLDR generation call so I can audit and optimize API costs.",
+      "acceptanceCriteria": [
+        "In src/lib/ai/anthropic.ts, after each API call log: model name, input_tokens, output_tokens from response.usage to console",
+        "Format: [Claude] model=claude-sonnet-4-5 input=1234 output=567 (extraction) or (tldr)",
+        "In src/lib/digest/generateTLDR.ts, same logging pattern",
+        "Typecheck passes"
+      ],
+      "priority": 73,
+      "passes": false,
+      "notes": "P2. Simple console logging of usage stats. No DB storage needed — Vercel logs capture these. Helps identify expensive newsletters."
+    },
+    {
+      "id": "US-079",
+      "title": "Add database archiving and pruning strategy for articles and ingestion logs",
+      "description": "As a developer, I need a strategy to prevent unbounded growth of the articles and ingestion_log tables as the pipeline runs daily.",
+      "acceptanceCriteria": [
+        "Create a SQL migration that adds a scheduled Supabase pg_cron job (or document a manual process) to: delete ingestion_log rows older than 90 days, delete articles rows older than 180 days where the article has been sent to all active subscribers (check user_article_log)",
+        "Alternatively, create a /api/admin/prune endpoint protected by ADMIN_SECRET that runs the cleanup queries on demand",
+        "Document the pruning strategy in a comment in the migration or endpoint",
+        "Typecheck passes"
+      ],
+      "priority": 74,
+      "passes": false,
+      "notes": "P2. At current scale (10 newsletters/blogs × 10 articles/day = 100 articles/day = 36,500/year) the DB will grow significantly. ingestion_log grows even faster."
     }
   ]
 }
