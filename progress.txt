@@ -745,3 +745,23 @@ AI News Aggregator & Newsletter Platform - Curated AI news from top newsletters 
   - When inserting a row and immediately needing it for a follow-up query, chain `.select('created_at').single()` on the insert to get the row data back
   - Waitlist position = COUNT(*) WHERE created_at <= new_entry.created_at (not total count)
 ---
+
+## 2026-04-01 - US-069
+- **Implemented:** Weekly digest: themes-only AI summary with no individual article links
+- **Files created:**
+  - src/lib/digest/generateWeeklySummary.ts (Claude Haiku call returning { themes: [{title, summary, sources}] })
+  - src/emails/WeeklyDigestEmail.tsx (separate template: logo + date range, story count, AI disclaimer, theme sections with source pills, footer only)
+  - supabase/migrations/20260401000003_add_themes_to_digest_cache.sql (add JSONB themes column to digest_cache)
+- **Files changed:**
+  - src/lib/digest/sendDigest.ts (added frequency, weeklyThemes, weeklyDateRange params; routes to WeeklyDigestEmail for weekly users)
+  - src/lib/jobs/sendDigests.ts (weekly branch: calls generateWeeklySummary, caches with key `weekly-YYYY-WW`, passes themes to sendDigest; ISO week number helper)
+  - src/components/FrequencySelector.tsx (weekly description updated to "Every Monday — a curated AI summary of the week's key themes. No individual article links.")
+  - src/app/api/verify/route.ts (selects frequency from user, passes as ?frequency= query param on redirect to /verify-success)
+  - src/app/verify-success/page.tsx (async page reading searchParams; daily shows "Your first digest arrives tomorrow morning", weekly shows "Your first weekly summary arrives next Monday")
+- **Learnings for future iterations:**
+  - digest_cache table now has both takeaways (TEXT[]) for daily and themes (JSONB) for weekly — check which column applies when reading cache
+  - Weekly cache key format is `weekly-YYYY-WW` (ISO week number, zero-padded); daily is `YYYY-MM-DD-daily`
+  - ISO week number calculation: shift day to Thursday, then diff from Jan 4 (always in week 1)
+  - verify-success page uses Next.js 15 async searchParams (Promise<{...}>) — must await before reading
+  - For email templates that don't use article links, still pass groupedArticles for article logging purposes; just don't render them in the template
+---

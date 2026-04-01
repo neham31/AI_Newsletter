@@ -655,7 +655,7 @@
         "Typecheck passes"
       ],
       "priority": 5,
-      "passes": false,
+      "passes": true,
       "notes": "P1. Weekly = themes-only summary format. No article list, no backlinks. Cleaner for weekly cadence. AI disclaimer required. Separate email template from daily digest."
     },
     {
