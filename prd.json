@@ -637,7 +637,7 @@
         "Typecheck passes"
       ],
       "priority": 4,
-      "passes": false,
+      "passes": true,
       "notes": "P1. raw_emails table may have been created manually in Supabase. Waitlist position currently uses total count not position-relative count."
     },
     {

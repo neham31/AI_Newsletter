@@ -732,3 +732,16 @@ AI News Aggregator & Newsletter Platform - Curated AI news from top newsletters 
   - When moving per-user logic to batch level, pass the result as a parameter to lower-level functions rather than re-computing in each call
   - Supabase `.single()` returns null data (not error) when no row found — safe to check `if (cachedEntry)` without error handling
 ---
+
+## 2026-04-01 - US-068
+- **Implemented:** Fix raw_emails migration and verify subscriber cap counter
+- **Files changed:**
+  - supabase/migrations/20260401000002_create_raw_emails_table.sql (new: raw_emails table with all required columns + indexes)
+  - src/app/api/subscribe/route.ts (fix new waitlist entry position: insert with .select('created_at').single() then count WHERE created_at <= new entry's created_at)
+- **Verification:**
+  - subscription-status/route.ts already correctly counts `is_active=true AND email_verified=true` users — no change needed
+  - Waitlist position for existing entries already used position-relative count (lte query) — only new entry path was broken
+- **Learnings for future iterations:**
+  - When inserting a row and immediately needing it for a follow-up query, chain `.select('created_at').single()` on the insert to get the row data back
+  - Waitlist position = COUNT(*) WHERE created_at <= new_entry.created_at (not total count)
+---
