@@ -606,7 +606,7 @@
         "Typecheck passes"
       ],
       "priority": 2,
-      "passes": false,
+      "passes": true,
       "notes": "P1 UX bug. Links exist in HTML but are invisible - same color as body text with no underline. Simple 2-line style change."
     },
     {

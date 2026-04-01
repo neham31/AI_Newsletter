@@ -709,3 +709,12 @@ AI News Aggregator & Newsletter Platform - Curated AI news from top newsletters 
   - Fix: `new URL(url)` then `parsed.hostname = parsed.hostname.toLowerCase()`
   - Tracking param stripping now uses `key.toLowerCase()` for case-insensitive comparison
 ---
+
+## 2026-04-01 - US-066
+- **Implemented:** Fix digest email link styling - make headlines visually clickable
+- **Files changed:**
+  - src/emails/DigestEmail.tsx (changed `headline` style: color '#2D2D2D' → '#B8A9E8', textDecoration 'none' → 'underline')
+- **Learnings for future iterations:**
+  - Email link visibility: react-email `<Link>` elements need explicit color and textDecoration since email clients strip default browser link styles
+  - Footer links already had lavender + underline — headline links were missing the same treatment
+---
