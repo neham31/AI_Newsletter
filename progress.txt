@@ -683,3 +683,20 @@ AI News Aggregator & Newsletter Platform - Curated AI news from top newsletters 
   - Preferences link needs token param which users get from digest emails (can't link directly without token)
 ---
 
+
+## 2026-04-01 - US-039
+- **Implemented:** Build preferences page (display)
+- **Files changed:**
+  - src/app/preferences/page.tsx (already existed with full implementation)
+- **Features verified:**
+  - Reads token from URL query params via useSearchParams()
+  - Fetches /api/sources and /api/preferences?token=... in parallel
+  - Shows all source cards with user's subscribed sources pre-checked
+  - Shows FrequencySelector with user's current frequency pre-selected
+  - Loading and error states handled
+  - Wrapped in Suspense for useSearchParams() compatibility
+- **Learnings for future iterations:**
+  - useSearchParams() requires Suspense boundary in Next.js 14 App Router
+  - Fetch all sources from /api/sources (not just subscribed ones) so user can change selections
+  - Initialize selectedSourceIds from preferences API response, not from sources API
+---
