@@ -891,3 +891,16 @@ AI News Aggregator & Newsletter Platform - Curated AI news from top newsletters 
   - For weekly preview without a real TLDR generation, build mock WeeklyTheme[] from grouped article headlines
   - GET forms in server components work naturally with searchParams — no client-side JavaScript needed
 ---
+
+## 2026-04-03 - US-078
+- **Implemented:** Token usage logging for Claude API calls
+- **Files changed:**
+  - supabase/migrations/20260403000004_create_claude_usage_log.sql (updated schema: added call_type, renamed date→called_at TIMESTAMPTZ)
+  - src/lib/ai/anthropic.ts (added logClaudeUsage helper, called after extraction + retry calls)
+  - src/lib/digest/generateTLDR.ts (added usage logging after API call)
+  - src/lib/digest/generateWeeklySummary.ts (added usage logging after API call)
+- **Learnings for future iterations:**
+  - Claude API response includes `response.model` (actual model string) and `response.usage.input_tokens`/`response.usage.output_tokens`
+  - logClaudeUsage is fire-and-forget (void) — errors are caught internally so they never break the calling flow
+  - Migration 20260403000004 was updated in-place (not yet applied to prod) to add call_type column
+---
