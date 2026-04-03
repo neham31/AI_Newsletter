@@ -75,11 +75,11 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
           const body = await res.text();
           return opsRedirect(request, secret, undefined, `Digest trigger failed (${res.status}): ${body.slice(0, 200)}`);
         }
-        const data = await res.json() as { emailsSent?: number; articlesIncluded?: number };
+        const data = await res.json() as { emailsSent?: number; articlesIncluded?: number; usersProcessed?: number; skippedNoArticles?: number; errors?: number };
         return opsRedirect(
           request,
           secret,
-          `${frequency.charAt(0).toUpperCase() + frequency.slice(1)} digest triggered. Emails sent: ${data.emailsSent ?? 0}, Articles included: ${data.articlesIncluded ?? 0}`
+          `${frequency.charAt(0).toUpperCase() + frequency.slice(1)} digest triggered. Users processed: ${data.usersProcessed ?? 0}, Emails sent: ${data.emailsSent ?? 0}, Skipped (no articles): ${data.skippedNoArticles ?? 0}, Errors: ${data.errors ?? 0}`
         );
       }
 
