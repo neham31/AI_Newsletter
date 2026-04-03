@@ -78,13 +78,19 @@ export async function sendDigests(
 
   const supabase = createServiceRoleClient();
 
-  // Fetch eligible users
+  // Idempotency: skip users already sent a digest within the window.
+  // Daily = 20h window, weekly = 144h (6 days) window.
+  // Prevents double-sends when GitHub Actions and Vercel crons overlap.
+  const idempotencyHours = frequency === 'weekly' ? 144 : 20;
+  const cutoff = new Date(Date.now() - idempotencyHours * 60 * 60 * 1000).toISOString();
+
   const { data: users, error: usersError } = await supabase
     .from('users')
     .select('id, email, unsubscribe_token, signed_up_at')
     .eq('is_active', true)
     .eq('email_verified', true)
     .eq('frequency', frequency)
+    .or(`last_email_sent_at.is.null,last_email_sent_at.lt.${cutoff}`)
     .limit(batchSize);
 
   if (usersError) {

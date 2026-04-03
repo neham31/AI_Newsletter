@@ -345,10 +345,62 @@ export async function POST(request: NextRequest) {
           message: 'This email is pending verification. Please check your inbox for the confirmation email.',
         });
       } else {
-        // User exists but is inactive - they can re-subscribe
+        // User exists but is inactive (previously unsubscribed) — reactivate them
+        const newVerificationToken = randomUUID();
+        const newUnsubscribeToken = randomUUID();
+
+        // Update user: reactivate, reset tokens, update frequency, clear verified state
+        const { error: reactivateError } = await supabase
+          .from('users')
+          .update({
+            is_active: true,
+            email_verified: false,
+            verification_token: newVerificationToken,
+            unsubscribe_token: newUnsubscribeToken,
+            frequency: frequency as Frequency,
+            signed_up_at: new Date().toISOString(),
+          })
+          .eq('id', existingUser.id);
+
+        if (reactivateError) {
+          console.error('Error reactivating user:', reactivateError);
+          return NextResponse.json(
+            { error: 'Failed to reactivate subscription' },
+            { status: 500 }
+          );
+        }
+
+        // Replace subscriptions with new source selections
+        await supabase
+          .from('user_subscriptions')
+          .delete()
+          .eq('user_id', existingUser.id);
+
+        const { data: sourcesForReactivation } = await supabase
+          .from('sources')
+          .select('id, slug')
+          .in('slug', validSlugs)
+          .eq('is_active', true);
+
+        if (sourcesForReactivation && sourcesForReactivation.length > 0) {
+          const reactivationSubs = sourcesForReactivation.map((s) => ({
+            user_id: existingUser.id,
+            source_id: s.id,
+          }));
+          await supabase.from('user_subscriptions').insert(reactivationSubs);
+        }
+
+        // Send new verification email
+        const verifyUrl = `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/verify?token=${newVerificationToken}`;
+        sendEmail({
+          to: normalizedEmail,
+          subject: 'Confirm your explAI.in subscription',
+          react: VerificationEmail({ verificationUrl: verifyUrl }),
+        }).catch((err) => console.error('Failed to send reactivation verification email:', err));
+
         return NextResponse.json({
-          success: false,
-          message: 'This email was previously subscribed. Please contact us to reactivate your subscription.',
+          success: true,
+          message: 'Welcome back! Check your email to confirm your subscription.',
         });
       }
     }

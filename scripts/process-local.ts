@@ -9,11 +9,12 @@
 require('dotenv').config({ path: '.env.local' });
 
 async function main() {
-  console.log('=== AI Newsletter Pipeline ===\n');
+  console.log('=== AI Newsletter Ingestion Pipeline ===\n');
+  console.log('NOTE: Digest sending is handled exclusively by Vercel crons.');
+  console.log('This script only processes inbound emails (ingestion only).\n');
 
   // Dynamic imports after env is loaded
   const { processEmails } = await import('../src/lib/jobs/processEmails');
-  const { sendDigests } = await import('../src/lib/jobs/sendDigests');
 
   // Step 1: Process emails
   console.log('Step 1: Processing emails...');
@@ -24,16 +25,7 @@ async function main() {
     console.error('Error processing emails:', error);
   }
 
-  // Step 2: Send daily digest
-  console.log('\nStep 2: Sending daily digest...');
-  try {
-    const digestResult = await sendDigests('daily', 50);
-    console.log('Digest result:', digestResult);
-  } catch (error) {
-    console.error('Error sending digest:', error);
-  }
-
-  console.log('\n=== Pipeline complete ===');
+  console.log('\n=== Ingestion complete ===');
 }
 
 main().catch(console.error);
