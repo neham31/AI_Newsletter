@@ -462,6 +462,22 @@ export default async function OpsPage({ searchParams }: PageProps) {
           </div>
         </div>
 
+        {/* Test Digest */}
+        <div style={s.section}>
+          <h2 style={s.h2}>Send Test Digest</h2>
+          <p style={{ fontSize: '12px', color: '#999', margin: '0 0 12px' }}>
+            Sends immediately to any email, bypassing idempotency. Uses the recipient&apos;s unsent articles if they&apos;re a subscriber, otherwise uses latest articles.
+          </p>
+          <form method="POST" action={`/api/admin/test-digest?secret=${encodeURIComponent(secret)}`} style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' as const, alignItems: 'flex-start' }}>
+            <input type="email" name="email" placeholder="recipient@example.com" required style={s.input} />
+            <select name="frequency" style={{ ...s.input, minWidth: 'unset' }}>
+              <option value="weekly">Weekly</option>
+              <option value="daily">Daily</option>
+            </select>
+            <button type="submit" style={s.btnPrimary}>Send Test Digest</button>
+          </form>
+        </div>
+
         {/* User Management */}
         <div style={s.section}>
           <h2 style={s.h2}>User Management</h2>
