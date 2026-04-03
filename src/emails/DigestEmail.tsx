@@ -87,12 +87,7 @@ export function DigestEmail({
                   <Text style={styles.articleSummary}>{article.summary}</Text>
                   {article.tags && article.tags.length > 0 && (
                     <Text style={styles.tags}>
-                      {article.tags.map((tag, i) => (
-                        <span key={tag}>
-                          <span style={styles.tag}>{tag}</span>
-                          {i < article.tags.length - 1 ? ' ' : ''}
-                        </span>
-                      ))}
+                      {article.tags.join(' · ')}
                     </Text>
                   )}
                 </Section>
@@ -209,15 +204,8 @@ const styles = {
   },
   tags: {
     fontSize: '12px',
+    color: '#9B9B9B',
     margin: 0,
-  },
-  tag: {
-    backgroundColor: '#F5F5F5',
-    color: '#6B6B6B',
-    padding: '2px 8px',
-    borderRadius: '12px',
-    display: 'inline-block',
-    marginRight: '4px',
   },
   sourceDivider: {
     borderColor: '#E8E8E4',
