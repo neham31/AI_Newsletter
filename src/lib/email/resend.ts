@@ -8,6 +8,7 @@ export interface SendEmailOptions {
   to: string | string[];
   subject: string;
   html?: string;
+  text?: string;
   react?: React.ReactElement;
   from?: string;
   replyTo?: string;
@@ -47,6 +48,7 @@ export async function sendEmail(options: SendEmailOptions): Promise<SendEmailRes
       to: options.to,
       subject: options.subject,
       html,
+      text: options.text,
       replyTo: options.replyTo,
       headers: options.headers,
     });

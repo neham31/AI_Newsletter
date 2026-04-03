@@ -4,6 +4,77 @@ import { WeeklyDigestEmail } from '@/emails/WeeklyDigestEmail';
 import type { GroupedArticles } from './getUnsentArticles';
 import type { WeeklyTheme } from './generateWeeklySummary';
 
+function buildDailyPlainText(
+  dateStr: string,
+  articleCount: number,
+  groupedArticles: GroupedArticles[],
+  keyTakeaways: string[],
+  unsubscribeUrl: string
+): string {
+  const lines: string[] = [];
+
+  lines.push(`explAI.in Digest — ${dateStr}`);
+  lines.push(`${articleCount} ${articleCount === 1 ? 'story' : 'stories'} today`);
+  lines.push('');
+
+  if (keyTakeaways.length > 0) {
+    lines.push('KEY TAKEAWAYS');
+    lines.push('=============');
+    for (const takeaway of keyTakeaways) {
+      lines.push(`• ${takeaway}`);
+    }
+    lines.push('');
+  }
+
+  for (const group of groupedArticles) {
+    lines.push(group.source_name.toUpperCase());
+    lines.push('-'.repeat(group.source_name.length));
+    for (const article of group.articles) {
+      lines.push('');
+      lines.push(article.headline);
+      lines.push(article.summary);
+      lines.push(article.url);
+      if (article.tags.length > 0) {
+        lines.push(article.tags.join(' · '));
+      }
+    }
+    lines.push('');
+  }
+
+  lines.push('---');
+  lines.push(`Unsubscribe: ${unsubscribeUrl}`);
+
+  return lines.join('\n');
+}
+
+function buildWeeklyPlainText(
+  dateRange: string,
+  articleCount: number,
+  themes: WeeklyTheme[],
+  unsubscribeUrl: string
+): string {
+  const lines: string[] = [];
+
+  lines.push(`explAI.in Weekly Summary — ${dateRange}`);
+  lines.push(`${articleCount} ${articleCount === 1 ? 'story' : 'stories'} reviewed`);
+  lines.push('');
+
+  for (const theme of themes) {
+    lines.push(theme.title.toUpperCase());
+    lines.push('='.repeat(theme.title.length));
+    lines.push(theme.summary);
+    if (theme.sources.length > 0) {
+      lines.push(`Sources: ${theme.sources.join(', ')}`);
+    }
+    lines.push('');
+  }
+
+  lines.push('---');
+  lines.push(`Unsubscribe: ${unsubscribeUrl}`);
+
+  return lines.join('\n');
+}
+
 /**
  * Result of sending a digest email
  */
@@ -70,6 +141,7 @@ export async function sendDigest(
         unsubscribeUrl,
         preferencesUrl,
       }),
+      text: buildWeeklyPlainText(dateRange, articleCount, weeklyThemes, unsubscribeUrl),
       headers: {
         'List-Unsubscribe': `<${unsubscribeUrl}>`,
         'List-Unsubscribe-Post': 'List-Unsubscribe=One-Click',
@@ -104,6 +176,7 @@ export async function sendDigest(
       preferencesUrl,
       keyTakeaways,
     }),
+    text: buildDailyPlainText(dateStr, articleCount, groupedArticles, keyTakeaways, unsubscribeUrl),
     headers: {
       'List-Unsubscribe': `<${unsubscribeUrl}>`,
       'List-Unsubscribe-Post': 'List-Unsubscribe=One-Click',
