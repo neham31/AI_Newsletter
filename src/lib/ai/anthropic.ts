@@ -156,6 +156,18 @@ function parseArticlesResponse(content: string): ExtractedArticle[] {
 }
 
 /**
+ * Strips HTML boilerplate tags to reduce token usage before sending to Claude.
+ * Removes <style>, <head>, <script>, and <noscript> blocks which contain no useful content.
+ */
+export function stripHtmlBoilerplate(html: string): string {
+  return html
+    .replace(/<style[\s\S]*?<\/style>/gi, '')
+    .replace(/<head[\s\S]*?<\/head>/gi, '')
+    .replace(/<script[\s\S]*?<\/script>/gi, '')
+    .replace(/<noscript[\s\S]*?<\/noscript>/gi, '');
+}
+
+/**
  * Extracts articles from newsletter HTML content using Claude
  *
  * @param htmlContent - The raw HTML content of the newsletter
@@ -170,12 +182,15 @@ export async function extractArticles(
 ): Promise<ExtractionResult> {
   const extractionDate = receivedDate || new Date().toISOString();
 
+  // Strip HTML boilerplate before truncation to reduce token usage
+  const strippedHtml = stripHtmlBoilerplate(htmlContent);
+
   // Truncate HTML if too long (keep under token limits)
   const maxHtmlLength = 50000; // ~12.5k tokens assuming 4 chars/token
   const truncatedHtml =
-    htmlContent.length > maxHtmlLength
-      ? htmlContent.slice(0, maxHtmlLength) + '\n... [truncated]'
-      : htmlContent;
+    strippedHtml.length > maxHtmlLength
+      ? strippedHtml.slice(0, maxHtmlLength) + '\n... [truncated]'
+      : strippedHtml;
 
   try {
     // First attempt
