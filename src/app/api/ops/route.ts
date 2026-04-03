@@ -1,7 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServiceRoleClient } from '@/lib/supabase/server';
-import { sendDigests } from '@/lib/jobs/sendDigests';
-import type { Frequency } from '@/types/database';
 
 function getBaseUrl(request: NextRequest): string {
   const host = request.headers.get('host') ?? 'localhost:3000';
@@ -66,12 +64,22 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 
       case 'trigger-digest-daily':
       case 'trigger-digest-weekly': {
-        const frequency: Frequency = action === 'trigger-digest-daily' ? 'daily' : 'weekly';
-        const result = await sendDigests(frequency);
+        const frequency = action === 'trigger-digest-daily' ? 'daily' : 'weekly';
+        const baseUrl = getBaseUrl(request);
+        const cronSecret = process.env.CRON_SECRET ?? '';
+        const res = await fetch(`${baseUrl}/api/digest/send?frequency=${frequency}`, {
+          method: 'POST',
+          headers: { 'x-cron-secret': cronSecret },
+        });
+        if (!res.ok) {
+          const body = await res.text();
+          return opsRedirect(request, secret, undefined, `Digest trigger failed (${res.status}): ${body.slice(0, 200)}`);
+        }
+        const data = await res.json() as { emailsSent?: number; articlesIncluded?: number };
         return opsRedirect(
           request,
           secret,
-          `${frequency.charAt(0).toUpperCase() + frequency.slice(1)} digest triggered. Emails sent: ${result.emailsSent}, Articles included: ${result.articlesIncluded}`
+          `${frequency.charAt(0).toUpperCase() + frequency.slice(1)} digest triggered. Emails sent: ${data.emailsSent ?? 0}, Articles included: ${data.articlesIncluded ?? 0}`
         );
       }
 

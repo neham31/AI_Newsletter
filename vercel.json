@@ -8,6 +8,9 @@
     },
     "src/app/api/ingest/rss/route.ts": {
       "maxDuration": 300
+    },
+    "src/app/api/ops/route.ts": {
+      "maxDuration": 300
     }
   },
   "crons": [

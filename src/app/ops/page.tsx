@@ -21,7 +21,7 @@ interface PipelineRow {
 }
 
 interface ClaudeUsageRow {
-  date: string;
+  called_at: string;
   model: string;
   input_tokens: number;
   output_tokens: number;
@@ -153,9 +153,9 @@ export default async function OpsPage({ searchParams }: PageProps) {
       .limit(5),
     supabase
       .from('claude_usage_log')
-      .select('date, model, input_tokens, output_tokens')
-      .gte('date', sevenDaysAgo.slice(0, 10))
-      .order('date', { ascending: false })
+      .select('called_at, model, input_tokens, output_tokens')
+      .gte('called_at', sevenDaysAgo)
+      .order('called_at', { ascending: false })
       .limit(100),
     supabase
       .from('system_config')
@@ -205,15 +205,16 @@ export default async function OpsPage({ searchParams }: PageProps) {
   // Aggregate claude usage by date+model
   const claudeAgg = new Map<string, ClaudeUsageRow>();
   for (const row of (claudeRes.data ?? []) as ClaudeUsageRow[]) {
-    const key = `${row.date}__${row.model}`;
+    const date = row.called_at.slice(0, 10);
+    const key = `${date}__${row.model}`;
     if (!claudeAgg.has(key)) {
-      claudeAgg.set(key, { date: row.date, model: row.model, input_tokens: 0, output_tokens: 0 });
+      claudeAgg.set(key, { called_at: date, model: row.model, input_tokens: 0, output_tokens: 0 });
     }
     const g = claudeAgg.get(key)!;
     g.input_tokens += row.input_tokens;
     g.output_tokens += row.output_tokens;
   }
-  const claudeSummary = Array.from(claudeAgg.values()).sort((a, b) => b.date.localeCompare(a.date));
+  const claudeSummary = Array.from(claudeAgg.values()).sort((a, b) => b.called_at.localeCompare(a.called_at));
 
   const ingestionLogCount = ingestionCountRes.count ?? 0;
   const oldestArticleDate = (oldestArticleRes.data as { ingested_at: string } | null)?.ingested_at ?? null;
@@ -422,7 +423,7 @@ export default async function OpsPage({ searchParams }: PageProps) {
               <tbody>
                 {claudeSummary.map((row, i) => (
                   <tr key={i}>
-                    <td style={s.td}>{formatDate(row.date)}</td>
+                    <td style={s.td}>{formatDate(row.called_at)}</td>
                     <td style={s.td}><code style={s.code}>{row.model}</code></td>
                     <td style={s.td}>{row.input_tokens.toLocaleString()}</td>
                     <td style={s.td}>{row.output_tokens.toLocaleString()}</td>
