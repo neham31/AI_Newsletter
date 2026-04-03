@@ -78,7 +78,7 @@ Extract each distinct news item as a JSON array. For each item return:
 {
   "headline": "Clear, concise headline (max 120 chars)",
   "summary": "2-3 sentence summary of the news item. Be factual and specific.",
-  "url": "Direct URL to the original source (not the newsletter link, but the underlying article/announcement). If not available, use the newsletter's own link to this item.",
+  "url": "The direct link from the newsletter HTML (use the newsletter redirect URL as-is — do not try to guess or reconstruct the original article URL). If multiple links exist for an item, prefer the most specific one.",
   "tags": ["tag1", "tag2"],
   "image_url": "URL of associated image if present, null otherwise",
   "published_at": "ISO 8601 date if mentioned, otherwise use ${receivedDate}",
