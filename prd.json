@@ -1091,7 +1091,7 @@
         "Typecheck passes"
       ],
       "priority": 68,
-      "passes": false,
+      "passes": true,
       "notes": "P2. Plain text version improves spam score and is required by some email clients and accessibility tools."
     },
     {

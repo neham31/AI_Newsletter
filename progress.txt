@@ -822,3 +822,18 @@ AI News Aggregator & Newsletter Platform - Curated AI news from top newsletters 
   - `stripHtmlBoilerplate` is exported and can be unit tested or reused elsewhere
   - The regex uses `[\s\S]*?` (lazy dot-all) to handle multiline tag content correctly
 ---
+
+## 2026-04-03 - US-073
+- **Implemented:** Add plain text fallback to digest emails
+- **Files changed:**
+  - src/lib/email/resend.ts (added `text` field to SendEmailOptions, passed through to resend.emails.send)
+  - src/lib/digest/sendDigest.ts (added `buildDailyPlainText` and `buildWeeklyPlainText` helpers, pass text to sendEmail)
+- **What was done:**
+  - Added `text?: string` to `SendEmailOptions` interface and forwarded it to the Resend API call
+  - `buildDailyPlainText`: header with date/count, Key Takeaways section (if present), articles grouped by source with headline/summary/URL/tags
+  - `buildWeeklyPlainText`: header with dateRange/count, themes with title/summary/sources
+  - Both builders return joined newlines for clean plain text
+- **Learnings for future iterations:**
+  - `WeeklyTheme` has `title`, `summary`, `sources` — NOT `theme` or `articles`
+  - Resend accepts both `html` and `text` fields simultaneously for multipart MIME
+---
