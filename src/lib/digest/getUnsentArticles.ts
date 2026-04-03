@@ -29,13 +29,13 @@ export interface GroupedArticles {
  *
  * @param userId - The user's ID
  * @param signedUpAt - The user's signup date (don't include articles before this)
- * @param limit - Maximum total articles to return (default 20)
+ * @param limit - Maximum total articles to return (default 50)
  * @returns Articles grouped by source, ready for digest assembly
  */
 export async function getUnsentArticles(
   userId: string,
   signedUpAt: string,
-  limit: number = 20
+  limit: number = 50
 ): Promise<GroupedArticles[]> {
   const supabase = createServiceRoleClient();
 

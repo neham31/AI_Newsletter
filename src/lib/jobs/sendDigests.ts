@@ -171,7 +171,7 @@ export async function sendDigests(
         const groupedArticles = await getUnsentArticles(
           user.id,
           user.signed_up_at || user.id,
-          40
+          50
         );
 
         const totalArticles = groupedArticles.reduce(
@@ -276,7 +276,7 @@ export async function sendDigests(
       const groupedArticles = await getUnsentArticles(
         user.id,
         user.signed_up_at || user.id,
-        20
+        50
       );
 
       const totalArticles = groupedArticles.reduce(
