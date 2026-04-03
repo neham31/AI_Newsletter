@@ -782,3 +782,20 @@ AI News Aggregator & Newsletter Platform - Curated AI news from top newsletters 
   - Most mobile responsiveness was already implemented via `sm:` breakpoint prefixes in earlier stories
   - `py-4` = 16px vertical padding, `px-4` = 16px horizontal padding — both target 16px mobile padding
 ---
+
+## 2026-04-03 - US-070
+- **Implemented:** Admin dashboard at /ops with subscriber stats, recent digests, pipeline health, Claude usage, and action buttons
+- **Files created:**
+  - supabase/migrations/20260403000004_create_claude_usage_log.sql (new table: date, model, input_tokens, output_tokens)
+  - src/app/ops/page.tsx (server component, ADMIN_SECRET auth via ?secret= query param)
+  - src/app/api/ops/route.ts (POST handler for admin actions: toggle-signups, trigger-ingest, trigger-digest-daily/weekly, deactivate-user, promote-waitlist)
+- **Files modified:**
+  - .env.example (added ADMIN_SECRET variable)
+- **Learnings for future iterations:**
+  - Server components can't set HTTP status codes directly; return JSX with "401 Unauthorized" content for auth failures
+  - Root layout always wraps pages - don't return <html>/<body> from page components
+  - Inline React style objects use camelCase properties; style strings are not valid as React style props
+  - Supabase join syntax: `.select('id, related_table(field)')` works with the service role client
+  - For admin trigger actions that need CRON_SECRET, call internal API endpoints via fetch with the secret in x-cron-secret header using `getBaseUrl(request)` to derive the host
+  - `crypto.randomUUID()` is available globally in Node.js 18+ (no import needed)
+---

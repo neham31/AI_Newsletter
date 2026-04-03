@@ -1049,7 +1049,7 @@
         "Typecheck passes"
       ],
       "priority": 65,
-      "passes": false,
+      "passes": true,
       "notes": "P2. Read-only admin page. Uses ADMIN_SECRET for simple auth. All data from existing tables."
     },
     {
