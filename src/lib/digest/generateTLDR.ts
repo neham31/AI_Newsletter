@@ -1,4 +1,4 @@
-import { anthropic } from '@/lib/ai/anthropic';
+import { anthropic, logClaudeUsage } from '@/lib/ai/anthropic';
 
 interface ArticleInput {
   headline: string;
@@ -57,6 +57,14 @@ Return ONLY a JSON array of strings, no other text. Example: ["Takeaway 1", "Tak
 
     // Race between timeout and API call
     const response = await Promise.race([apiPromise, timeoutPromise]);
+
+    // Log usage
+    void logClaudeUsage(
+      response.model,
+      response.usage.input_tokens,
+      response.usage.output_tokens,
+      'tldr'
+    );
 
     // Extract text content from response
     const textContent = response.content.find((block) => block.type === 'text');

@@ -1,4 +1,5 @@
 import Anthropic from '@anthropic-ai/sdk';
+import { createServiceRoleClient } from '@/lib/supabase/server';
 
 /**
  * Anthropic client for Claude API calls
@@ -7,6 +8,32 @@ import Anthropic from '@anthropic-ai/sdk';
 export const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
 });
+
+/**
+ * Logs Claude API usage to the database and console.
+ * Fire-and-forget — errors are caught and logged but not propagated.
+ */
+export async function logClaudeUsage(
+  model: string,
+  inputTokens: number,
+  outputTokens: number,
+  callType: 'extraction' | 'tldr' | 'weekly_summary'
+): Promise<void> {
+  console.log(
+    `[Claude] model=${model} input=${inputTokens} output=${outputTokens} type=${callType}`
+  );
+  try {
+    const supabase = createServiceRoleClient();
+    await supabase.from('claude_usage_log').insert({
+      model,
+      input_tokens: inputTokens,
+      output_tokens: outputTokens,
+      call_type: callType,
+    });
+  } catch (err) {
+    console.error('[Claude] Failed to log usage:', err);
+  }
+}
 
 /**
  * Valid tags for article categorization
@@ -206,6 +233,14 @@ export async function extractArticles(
       ],
     });
 
+    // Log usage
+    void logClaudeUsage(
+      response.model,
+      response.usage.input_tokens,
+      response.usage.output_tokens,
+      'extraction'
+    );
+
     // Extract text content from response
     const textContent = response.content.find((block) => block.type === 'text');
     if (!textContent || textContent.type !== 'text') {
@@ -252,6 +287,14 @@ export async function extractArticles(
           },
         ],
       });
+
+      // Log retry usage
+      void logClaudeUsage(
+        retryResponse.model,
+        retryResponse.usage.input_tokens,
+        retryResponse.usage.output_tokens,
+        'extraction'
+      );
 
       const retryTextContent = retryResponse.content.find(
         (block) => block.type === 'text'
