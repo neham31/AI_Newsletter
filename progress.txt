@@ -904,3 +904,24 @@ AI News Aggregator & Newsletter Platform - Curated AI news from top newsletters 
   - logClaudeUsage is fire-and-forget (void) — errors are caught internally so they never break the calling flow
   - Migration 20260403000004 was updated in-place (not yet applied to prod) to add call_type column
 ---
+## 2026-04-03 - US-079
+- **Implemented:** Database archiving and pruning strategy for articles and ingestion logs
+- **Files created:**
+  - src/app/api/admin/prune/route.ts (POST endpoint, protected by ADMIN_SECRET via ?secret= or Authorization: Bearer header)
+- **Files changed:**
+  - src/app/ops/page.tsx (added Storage Health section with ingestion_log row count, oldest article date, orange "Pruning recommended" badge, and Prune Now form button)
+- **Endpoint behavior:**
+  - Deletes ingestion_log rows older than 90 days
+  - Deletes articles older than 180 days that were NOT sent to any user in the past 180 days (fetches protected IDs from user_article_log first)
+  - Returns JSON: `{ ingestion_log_deleted: N, articles_deleted: N }`
+- **UI behavior:**
+  - Queries ingestion_log row count and oldest article ingested_at in parallel with other ops data
+  - Shows "Pruning recommended" orange badge if ingestion_log > 10000 OR oldest article > 90 days ago
+  - "Prune Now" button POSTs form to /api/admin/prune?secret=... (returns JSON response)
+- **Learnings for future iterations:**
+  - Supabase JS client supports `.not('id', 'in', '(uuid1,uuid2,...)')` for NOT IN filtering
+  - For complex subquery deletes (NOT IN subquery), fetch the subquery result first then filter in-app
+  - `.delete({ count: 'exact' })` returns the count of deleted rows in Supabase JS client
+  - `.maybeSingle()` is safer than `.single()` when query might return 0 rows (no PGRST116 error)
+  - Added `badgeOrange` style to ops page styles object for orange warning indicators
+---

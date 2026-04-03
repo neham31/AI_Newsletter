@@ -614,7 +614,7 @@
       "title": "Fix TLDR truncation and cache takeaways per batch",
       "description": "As a subscriber, I want the Key Takeaways section to display complete, untruncated text. As a developer, I want TLDR to be generated once per digest run and reused for all users to reduce Claude API costs.",
       "acceptanceCriteria": [
-        "Fix truncation: in DigestEmail.tsx, replace nested <span> bullet with plain text bullet character directly in the string (e.g., `\u2022 ${takeaway}` as a single Text element with no nested span). Remove tldrBullet span style entirely.",
+        "Fix truncation: in DigestEmail.tsx, replace nested <span> bullet with plain text bullet character directly in the string (e.g., `• ${takeaway}` as a single Text element with no nested span). Remove tldrBullet span style entirely.",
         "Cache TLDR: add a digest_cache table via migration with columns: id (uuid PK), cache_key (text unique), takeaways (text array), created_at",
         "In sendDigests.ts, generate TLDR once before the user loop using a cache_key of format `{date}-{frequency}` (e.g., '2026-04-01-daily')",
         "Check digest_cache for existing entry before calling generateTLDR",
@@ -643,14 +643,14 @@
     {
       "id": "US-069",
       "title": "Weekly digest: themes-only AI summary with no individual article links",
-      "description": "As a weekly subscriber, I want my digest to be a clean AI-generated thematic summary of the week's most important AI stories \u2014 organized by theme with cross-source coverage noted \u2014 with NO individual article list or backlinks. Weekly is a summary format, not a curated article list.",
+      "description": "As a weekly subscriber, I want my digest to be a clean AI-generated thematic summary of the week's most important AI stories — organized by theme with cross-source coverage noted — with NO individual article list or backlinks. Weekly is a summary format, not a curated article list.",
       "acceptanceCriteria": [
         "Add generateWeeklySummary function in src/lib/digest/generateWeeklySummary.ts that takes all articles for the week and returns: { themes: Array<{ title: string, summary: string, sources: string[] }> }",
         "Uses Claude Haiku with a prompt that: identifies 3-5 key themes from the week, writes 2-3 sentence summary per theme, notes which sources covered each theme (boosting themes mentioned across multiple sources), does NOT include individual article URLs",
-        "Create a new WeeklyDigestEmail.tsx template (separate from DigestEmail.tsx) that shows: header with logo and date range (e.g. 'Week of March 31'), story count ('N stories reviewed across your sources'), AI disclaimer note ('AI summaries may contain errors \u2014 verify important details at the source'), themes section with title + summary + source pills per theme, footer with unsubscribe/preferences links only (no article links)",
+        "Create a new WeeklyDigestEmail.tsx template (separate from DigestEmail.tsx) that shows: header with logo and date range (e.g. 'Week of March 31'), story count ('N stories reviewed across your sources'), AI disclaimer note ('AI summaries may contain errors — verify important details at the source'), themes section with title + summary + source pills per theme, footer with unsubscribe/preferences links only (no article links)",
         "In sendDigest.ts, detect if user frequency is 'weekly' and use WeeklyDigestEmail template instead of DigestEmail",
         "Cache weekly summary in digest_cache table with cache_key format 'weekly-{YYYY-WW}'",
-        "Update FrequencySelector.tsx helper text for weekly option to: 'Every Monday \u2014 a curated AI summary of the week\\'s key themes. No individual article links.'",
+        "Update FrequencySelector.tsx helper text for weekly option to: 'Every Monday — a curated AI summary of the week\\'s key themes. No individual article links.'",
         "Update verify-success page text to differentiate: daily users see 'Your first digest arrives tomorrow morning', weekly users see 'Your first weekly summary arrives next Monday'",
         "Typecheck passes"
       ],
@@ -672,7 +672,7 @@
       ],
       "priority": 40,
       "passes": true,
-      "notes": "Verified implemented in codebase \u2014 marked complete."
+      "notes": "Verified implemented in codebase — marked complete."
     },
     {
       "id": "US-041",
@@ -688,7 +688,7 @@
       ],
       "priority": 41,
       "passes": true,
-      "notes": "Verified implemented in codebase \u2014 marked complete."
+      "notes": "Verified implemented in codebase — marked complete."
     },
     {
       "id": "US-042",
@@ -705,7 +705,7 @@
       ],
       "priority": 42,
       "passes": true,
-      "notes": "Verified implemented in codebase \u2014 marked complete."
+      "notes": "Verified implemented in codebase — marked complete."
     },
     {
       "id": "US-043",
@@ -718,7 +718,7 @@
       ],
       "priority": 43,
       "passes": true,
-      "notes": "Verified implemented in codebase \u2014 marked complete."
+      "notes": "Verified implemented in codebase — marked complete."
     },
     {
       "id": "US-044",
@@ -732,7 +732,7 @@
       ],
       "priority": 44,
       "passes": true,
-      "notes": "Verified implemented in codebase \u2014 marked complete."
+      "notes": "Verified implemented in codebase — marked complete."
     },
     {
       "id": "US-045",
@@ -749,7 +749,7 @@
       ],
       "priority": 45,
       "passes": true,
-      "notes": "Verified implemented in codebase \u2014 marked complete."
+      "notes": "Verified implemented in codebase — marked complete."
     },
     {
       "id": "US-046",
@@ -761,7 +761,7 @@
       ],
       "priority": 46,
       "passes": true,
-      "notes": "Verified implemented in codebase \u2014 marked complete."
+      "notes": "Verified implemented in codebase — marked complete."
     },
     {
       "id": "US-047",
@@ -775,7 +775,7 @@
       ],
       "priority": 47,
       "passes": true,
-      "notes": "Verified implemented in codebase \u2014 marked complete."
+      "notes": "Verified implemented in codebase — marked complete."
     },
     {
       "id": "US-048",
@@ -791,7 +791,7 @@
       ],
       "priority": 48,
       "passes": true,
-      "notes": "Verified implemented in codebase \u2014 marked complete."
+      "notes": "Verified implemented in codebase — marked complete."
     },
     {
       "id": "US-049",
@@ -807,7 +807,7 @@
       ],
       "priority": 49,
       "passes": true,
-      "notes": "Verified implemented in codebase \u2014 marked complete."
+      "notes": "Verified implemented in codebase — marked complete."
     },
     {
       "id": "US-050",
@@ -822,7 +822,7 @@
       ],
       "priority": 50,
       "passes": true,
-      "notes": "Verified implemented in codebase \u2014 marked complete."
+      "notes": "Verified implemented in codebase — marked complete."
     },
     {
       "id": "US-051",
@@ -837,7 +837,7 @@
       ],
       "priority": 51,
       "passes": true,
-      "notes": "Verified implemented in codebase \u2014 marked complete."
+      "notes": "Verified implemented in codebase — marked complete."
     },
     {
       "id": "US-052",
@@ -854,7 +854,7 @@
       ],
       "priority": 52,
       "passes": true,
-      "notes": "Verified implemented in codebase \u2014 marked complete."
+      "notes": "Verified implemented in codebase — marked complete."
     },
     {
       "id": "US-053",
@@ -869,7 +869,7 @@
       ],
       "priority": 53,
       "passes": true,
-      "notes": "Verified implemented in codebase \u2014 marked complete."
+      "notes": "Verified implemented in codebase — marked complete."
     },
     {
       "id": "US-054",
@@ -886,7 +886,7 @@
       ],
       "priority": 54,
       "passes": true,
-      "notes": "Verified implemented in codebase \u2014 marked complete."
+      "notes": "Verified implemented in codebase — marked complete."
     },
     {
       "id": "US-055",
@@ -903,7 +903,7 @@
       ],
       "priority": 55,
       "passes": true,
-      "notes": "Verified implemented in codebase \u2014 marked complete."
+      "notes": "Verified implemented in codebase — marked complete."
     },
     {
       "id": "US-056",
@@ -921,7 +921,7 @@
       ],
       "priority": 56,
       "passes": true,
-      "notes": "Verified implemented in codebase \u2014 marked complete."
+      "notes": "Verified implemented in codebase — marked complete."
     },
     {
       "id": "US-057",
@@ -937,7 +937,7 @@
       ],
       "priority": 57,
       "passes": true,
-      "notes": "Verified implemented in codebase \u2014 marked complete."
+      "notes": "Verified implemented in codebase — marked complete."
     },
     {
       "id": "US-058",
@@ -950,7 +950,7 @@
       ],
       "priority": 58,
       "passes": true,
-      "notes": "Verified implemented in codebase \u2014 marked complete."
+      "notes": "Verified implemented in codebase — marked complete."
     },
     {
       "id": "US-059",
@@ -963,7 +963,7 @@
       ],
       "priority": 59,
       "passes": true,
-      "notes": "Verified implemented in codebase \u2014 marked complete."
+      "notes": "Verified implemented in codebase — marked complete."
     },
     {
       "id": "US-060",
@@ -976,7 +976,7 @@
       ],
       "priority": 60,
       "passes": true,
-      "notes": "Verified implemented in codebase \u2014 marked complete."
+      "notes": "Verified implemented in codebase — marked complete."
     },
     {
       "id": "US-061",
@@ -989,7 +989,7 @@
       ],
       "priority": 61,
       "passes": true,
-      "notes": "Verified implemented in codebase \u2014 marked complete."
+      "notes": "Verified implemented in codebase — marked complete."
     },
     {
       "id": "US-062",
@@ -1004,7 +1004,7 @@
       ],
       "priority": 62,
       "passes": true,
-      "notes": "Verified implemented in codebase \u2014 marked complete."
+      "notes": "Verified implemented in codebase — marked complete."
     },
     {
       "id": "US-063",
@@ -1034,7 +1034,7 @@
       ],
       "priority": 64,
       "passes": true,
-      "notes": "Verified implemented in codebase \u2014 marked complete."
+      "notes": "Verified implemented in codebase — marked complete."
     },
     {
       "id": "US-070",
@@ -1110,16 +1110,16 @@
     },
     {
       "id": "US-075",
-      "title": "Fix Claude URL extraction \u2014 prefer redirect URLs over guessing original",
+      "title": "Fix Claude URL extraction — prefer redirect URLs over guessing original",
       "description": "As a developer, I need the Claude article extraction prompt updated to explicitly prefer the newsletter redirect URL rather than trying to infer the original article URL. Guessing the original URL leads to broken links, while redirect URLs work reliably (and are only broken by the now-fixed URL lowercasing bug in US-065).",
       "acceptanceCriteria": [
-        "In src/lib/ai/anthropic.ts, update the url field instruction in buildUserPrompt to: 'The direct link from the newsletter HTML (use the newsletter redirect URL as-is \u2014 do not try to guess or reconstruct the original article URL). If multiple links exist for an item, prefer the most specific one.'",
+        "In src/lib/ai/anthropic.ts, update the url field instruction in buildUserPrompt to: 'The direct link from the newsletter HTML (use the newsletter redirect URL as-is — do not try to guess or reconstruct the original article URL). If multiple links exist for an item, prefer the most specific one.'",
         "Remove the parenthetical '(not the newsletter link, but the underlying article/announcement)' which causes Claude to guess wrong URLs",
         "Typecheck passes"
       ],
       "priority": 70,
       "passes": true,
-      "notes": "P2. Bug 3 from gap analysis. Claude guesses original URLs from context \u2014 sometimes wrong. Newsletter redirect URLs are reliable as long as US-065 (case fix) is done first."
+      "notes": "P2. Bug 3 from gap analysis. Claude guesses original URLs from context — sometimes wrong. Newsletter redirect URLs are reliable as long as US-065 (case fix) is done first."
     },
     {
       "id": "US-076",
@@ -1127,7 +1127,7 @@
       "description": "As a subscriber using Outlook, I want article tags to render correctly. Currently tags use display:inline-block inside a React Email <Text> component which Outlook does not support, causing tags to stack vertically or render broken.",
       "acceptanceCriteria": [
         "In src/emails/DigestEmail.tsx, replace the tags <Text> + nested <span> approach with a React Email compatible layout",
-        "Use a <Row>/<Column> or plain comma-separated text fallback: render tags as plain text joined by ' \u00b7 ' (e.g. 'LLMs \u00b7 Agents \u00b7 Research') inside a single <Text> element with no nested spans",
+        "Use a <Row>/<Column> or plain comma-separated text fallback: render tags as plain text joined by ' · ' (e.g. 'LLMs · Agents · Research') inside a single <Text> element with no nested spans",
         "Tag text should be muted (color: '#9B9B9B') and smaller (fontSize: '12px')",
         "Remove the tag and tags style objects that use display: inline-block",
         "Typecheck passes"
@@ -1157,14 +1157,14 @@
       "title": "Add token usage logging for Claude API calls",
       "description": "As a developer, I want to log Claude API token usage (input tokens, output tokens, estimated cost) for each extraction and TLDR generation call so I can audit and optimize API costs.",
       "acceptanceCriteria": [
-        "Create supabase migration for claude_usage_log table: id (uuid PK), called_at (timestamptz default now), model (text), input_tokens (int), output_tokens (int), call_type (text \u2014 'extraction', 'tldr', 'weekly_summary')",
+        "Create supabase migration for claude_usage_log table: id (uuid PK), called_at (timestamptz default now), model (text), input_tokens (int), output_tokens (int), call_type (text — 'extraction', 'tldr', 'weekly_summary')",
         "In src/lib/ai/anthropic.ts, after each Anthropic API call, insert a row into claude_usage_log with model, input_tokens, output_tokens from response.usage, and call_type",
         "Also log to console: [Claude] model=claude-haiku-4-5 input=1234 output=567 type=extraction",
         "Typecheck passes"
       ],
       "priority": 73,
       "passes": true,
-      "notes": "P2. Simple console logging of usage stats. No DB storage needed \u2014 Vercel logs capture these. Helps identify expensive newsletters."
+      "notes": "P2. Simple console logging of usage stats. No DB storage needed — Vercel logs capture these. Helps identify expensive newsletters."
     },
     {
       "id": "US-079",
@@ -1178,8 +1178,8 @@
         "Typecheck passes"
       ],
       "priority": 74,
-      "passes": false,
-      "notes": "P2. At current scale (10 newsletters/blogs \u00d7 10 articles/day = 100 articles/day = 36,500/year) the DB will grow significantly. ingestion_log grows even faster."
+      "passes": true,
+      "notes": "P2. At current scale (10 newsletters/blogs × 10 articles/day = 100 articles/day = 36,500/year) the DB will grow significantly. ingestion_log grows even faster."
     }
   ]
 }
