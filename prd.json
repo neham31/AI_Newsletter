@@ -1118,7 +1118,7 @@
         "Typecheck passes"
       ],
       "priority": 70,
-      "passes": false,
+      "passes": true,
       "notes": "P2. Bug 3 from gap analysis. Claude guesses original URLs from context \u2014 sometimes wrong. Newsletter redirect URLs are reliable as long as US-065 (case fix) is done first."
     },
     {

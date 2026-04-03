@@ -846,3 +846,15 @@ AI News Aggregator & Newsletter Platform - Curated AI news from top newsletters 
   - All three cron endpoints (process-emails, rss, digest/send) already return 401 { error: 'Unauthorized' } when validateCronSecret returns false
   - No code changes were needed; story was already implemented as a byproduct of prior cron endpoint work
 ---
+
+## 2026-04-03 - US-075
+- What was implemented: Updated Claude URL extraction prompt to prefer newsletter redirect URLs instead of guessing original article URLs
+- Files changed:
+  - src/lib/ai/anthropic.ts (updated url field instruction in buildUserPrompt)
+- **What was done:**
+  - Changed the url field description from "Direct URL to the original source (not the newsletter link, but the underlying article/announcement)" to "The direct link from the newsletter HTML (use the newsletter redirect URL as-is — do not try to guess or reconstruct the original article URL). If multiple links exist for an item, prefer the most specific one."
+  - Removed the parenthetical that instructed Claude to find the "underlying article" which caused it to guess/infer URLs that were often wrong
+- **Learnings for future iterations:**
+  - Newsletter redirect URLs are more reliable than Claude guessing original article URLs from context
+  - Prompt wording strongly influences Claude's URL selection behavior — be explicit about using redirect URLs as-is
+---
