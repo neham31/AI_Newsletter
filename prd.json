@@ -1063,7 +1063,7 @@
         "Typecheck passes"
       ],
       "priority": 66,
-      "passes": false,
+      "passes": true,
       "notes": "P2. Daily users with 8+ sources could have 40+ new articles but only get 20. Weekly users accumulate a week of articles but cap at 20."
     },
     {

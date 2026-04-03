@@ -799,3 +799,13 @@ AI News Aggregator & Newsletter Platform - Curated AI news from top newsletters 
   - For admin trigger actions that need CRON_SECRET, call internal API endpoints via fetch with the secret in x-cron-secret header using `getBaseUrl(request)` to derive the host
   - `crypto.randomUUID()` is available globally in Node.js 18+ (no import needed)
 ---
+
+## 2026-04-03 - US-071
+- **Implemented:** Remove hardcoded article limit and make digest article count configurable
+- **Files changed:**
+  - src/lib/digest/getUnsentArticles.ts (default limit changed from 20 to 50)
+  - src/lib/jobs/sendDigests.ts (daily limit 20→50, weekly limit 40→50)
+- **Learnings for future iterations:**
+  - The `limit` parameter in `getUnsentArticles` controls how many articles max a user can receive per digest; the function fetches `limit * 2` from DB to account for already-sent articles before filtering
+  - Daily and weekly digest callers each pass explicit limits; changing the default in `getUnsentArticles` only affects direct callers that omit the argument
+---
