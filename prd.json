@@ -1105,7 +1105,7 @@
         "Typecheck passes"
       ],
       "priority": 69,
-      "passes": false,
+      "passes": true,
       "notes": "P2 security. Currently if CRON_SECRET env var is not set, the comparison throws and returns 500. Should return 401."
     },
     {

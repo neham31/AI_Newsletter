@@ -837,3 +837,12 @@ AI News Aggregator & Newsletter Platform - Curated AI news from top newsletters 
   - `WeeklyTheme` has `title`, `summary`, `sources` — NOT `theme` or `articles`
   - Resend accepts both `html` and `text` fields simultaneously for multipart MIME
 ---
+
+## 2026-04-03 - US-074
+- What was implemented: Verified CRON_SECRET missing returns 401 — implementation was already in place from prior iterations
+- Files changed: prd.json (marked passes: true), progress.txt
+- **Learnings for future iterations:**
+  - src/lib/auth/cron.ts already correctly returns false (not throws) when CRON_SECRET is undefined/empty
+  - All three cron endpoints (process-emails, rss, digest/send) already return 401 { error: 'Unauthorized' } when validateCronSecret returns false
+  - No code changes were needed; story was already implemented as a byproduct of prior cron endpoint work
+---
