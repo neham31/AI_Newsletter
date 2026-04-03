@@ -858,3 +858,16 @@ AI News Aggregator & Newsletter Platform - Curated AI news from top newsletters 
   - Newsletter redirect URLs are more reliable than Claude guessing original article URLs from context
   - Prompt wording strongly influences Claude's URL selection behavior — be explicit about using redirect URLs as-is
 ---
+## 2026-04-03 - US-076
+- What was implemented: Fixed email tag pills rendering in Outlook by replacing inline-block spans with plain text
+- Files changed:
+  - src/emails/DigestEmail.tsx
+- **What was done:**
+  - Replaced the `<Text>` + nested `<span style={{ display: 'inline-block' }}>` tag rendering with a single `<Text>` element containing `article.tags.join(' · ')`
+  - Removed the `tag` style object (which had `display: inline-block`) 
+  - Updated `tags` style to use `color: '#9B9B9B'` (muted) and `fontSize: '12px'`
+- **Learnings for future iterations:**
+  - React Email `<Text>` components don't support `display: inline-block` children — Outlook breaks these
+  - Use plain text with dot/bullet separators for tag lists: `tags.join(' · ')`
+  - Avoid any CSS that relies on inline-block, flexbox, or grid inside React Email text components for Outlook compatibility
+---

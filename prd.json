@@ -1133,7 +1133,7 @@
         "Typecheck passes"
       ],
       "priority": 71,
-      "passes": false,
+      "passes": true,
       "notes": "P2. React Email <Text> components do not reliably support display:inline-block children. Outlook in particular breaks. Plain text comma/dot separated tags are universally safe."
     },
     {
