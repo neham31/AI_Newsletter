@@ -1077,7 +1077,7 @@
         "Typecheck passes"
       ],
       "priority": 67,
-      "passes": false,
+      "passes": true,
       "notes": "P2. Newsletter HTML is bloated with CSS and tracking scripts. Claude only needs the visible content. Simple regex strip before API call."
     },
     {

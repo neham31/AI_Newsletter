@@ -809,3 +809,16 @@ AI News Aggregator & Newsletter Platform - Curated AI news from top newsletters 
   - The `limit` parameter in `getUnsentArticles` controls how many articles max a user can receive per digest; the function fetches `limit * 2` from DB to account for already-sent articles before filtering
   - Daily and weekly digest callers each pass explicit limits; changing the default in `getUnsentArticles` only affects direct callers that omit the argument
 ---
+
+## 2026-04-03 - US-072
+- **Implemented:** Strip HTML boilerplate before Claude extraction to reduce token usage
+- **Files changed:**
+  - src/lib/ai/anthropic.ts (added `stripHtmlBoilerplate` helper + call before truncation)
+- **What was done:**
+  - Added `stripHtmlBoilerplate(html: string): string` exported helper using regex to remove `<style>`, `<head>`, `<script>`, and `<noscript>` tag blocks
+  - Called `stripHtmlBoilerplate` on `htmlContent` before the 50000 char truncation step
+  - The 50000 char limit applies to the stripped content
+- **Learnings for future iterations:**
+  - `stripHtmlBoilerplate` is exported and can be unit tested or reused elsewhere
+  - The regex uses `[\s\S]*?` (lazy dot-all) to handle multiline tag content correctly
+---
