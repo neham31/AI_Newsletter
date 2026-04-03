@@ -28,7 +28,7 @@ export function SourceCard({ source, selected, onToggle }: SourceCardProps) {
       onClick={handleClick}
       onKeyDown={handleKeyDown}
       className={`
-        relative cursor-pointer rounded-lg border bg-white p-5 transition-all
+        relative cursor-pointer rounded-lg border bg-white p-4 sm:p-5 transition-all
         ${selected
           ? 'border-l-[3px] border-l-lavender border-t-border-gray border-r-border-gray border-b-border-gray bg-lavender/[0.08]'
           : 'border-border-gray hover:shadow-md hover:shadow-lg'

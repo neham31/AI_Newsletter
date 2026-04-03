@@ -222,7 +222,7 @@ export default function Home() {
   if (isLoading) {
     return (
       <main className="min-h-screen bg-cream">
-        <div className="mx-auto max-w-3xl px-4 sm:px-6 py-8 sm:py-12">
+        <div className="mx-auto max-w-3xl px-4 sm:px-6 py-4 sm:py-12">
           <Header />
           <div className="mt-12 text-center text-warm-gray">
             Loading sources...
@@ -235,7 +235,7 @@ export default function Home() {
   if (error) {
     return (
       <main className="min-h-screen bg-cream">
-        <div className="mx-auto max-w-3xl px-4 sm:px-6 py-8 sm:py-12">
+        <div className="mx-auto max-w-3xl px-4 sm:px-6 py-4 sm:py-12">
           <Header />
           <div className="mt-12 text-center text-error-rose">
             {error}
@@ -249,7 +249,7 @@ export default function Home() {
   if (submitSuccess) {
     return (
       <main className="min-h-screen bg-cream">
-        <div className="mx-auto max-w-3xl px-4 sm:px-6 py-8 sm:py-12">
+        <div className="mx-auto max-w-3xl px-4 sm:px-6 py-4 sm:py-12">
           <Header />
 
           <div className="mt-12 flex flex-col items-center">
@@ -298,7 +298,7 @@ export default function Home() {
   if (waitlistJoined) {
     return (
       <main className="min-h-screen bg-cream">
-        <div className="mx-auto max-w-3xl px-4 sm:px-6 py-8 sm:py-12">
+        <div className="mx-auto max-w-3xl px-4 sm:px-6 py-4 sm:py-12">
           <Header />
 
           <div className="mt-12 flex flex-col items-center">
@@ -354,7 +354,7 @@ export default function Home() {
   if (isWaitlistMode) {
     return (
       <main className="min-h-screen bg-cream">
-        <div className="mx-auto max-w-3xl px-4 sm:px-6 py-8 sm:py-12">
+        <div className="mx-auto max-w-3xl px-4 sm:px-6 py-4 sm:py-12">
           <Header />
 
           <div className="mt-12 flex flex-col items-center">
@@ -435,7 +435,7 @@ export default function Home() {
 
   return (
     <main className="min-h-screen bg-cream">
-      <div className="mx-auto max-w-3xl px-4 sm:px-6 py-8 sm:py-12">
+      <div className="mx-auto max-w-3xl px-4 sm:px-6 py-4 sm:py-12">
         <Header />
 
         <form onSubmit={handleSubmit} className="mt-12 space-y-8">
