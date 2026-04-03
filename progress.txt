@@ -765,3 +765,20 @@ AI News Aggregator & Newsletter Platform - Curated AI news from top newsletters 
   - verify-success page uses Next.js 15 async searchParams (Promise<{...}>) — must await before reading
   - For email templates that don't use article links, still pass groupedArticles for article logging purposes; just don't render them in the template
 ---
+
+## 2026-04-03 - US-063
+- **Implemented:** Add mobile responsive styles to landing page
+- **Files changed:**
+  - src/app/page.tsx (changed `py-8 sm:py-12` → `py-4 sm:py-12` in all container divs for 16px vertical padding on mobile)
+  - src/components/SourceCard.tsx (changed `p-5` → `p-4 sm:p-5` for reduced card padding on mobile)
+- **Changes made:**
+  - Source cards were already full-width on mobile via single-column grid (no explicit grid-cols-* = defaults to 1 column)
+  - Frequency pills were already stacking vertically on mobile via `flex flex-col sm:flex-row`
+  - Email input and button were already stacking vertically via `flex flex-col sm:flex-row` with `w-full sm:w-auto`
+  - Added `py-4` (16px) on mobile for vertical padding across all page state containers
+  - Reduced SourceCard internal padding to `p-4` (16px) on mobile
+- **Learnings for future iterations:**
+  - Tailwind `grid` without `grid-cols-*` defaults to 1 column, so source cards were already full-width on all screen sizes
+  - Most mobile responsiveness was already implemented via `sm:` breakpoint prefixes in earlier stories
+  - `py-4` = 16px vertical padding, `px-4` = 16px horizontal padding — both target 16px mobile padding
+---

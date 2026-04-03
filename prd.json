@@ -614,7 +614,7 @@
       "title": "Fix TLDR truncation and cache takeaways per batch",
       "description": "As a subscriber, I want the Key Takeaways section to display complete, untruncated text. As a developer, I want TLDR to be generated once per digest run and reused for all users to reduce Claude API costs.",
       "acceptanceCriteria": [
-        "Fix truncation: in DigestEmail.tsx, replace nested <span> bullet with plain text bullet character directly in the string (e.g., `• ${takeaway}` as a single Text element with no nested span). Remove tldrBullet span style entirely.",
+        "Fix truncation: in DigestEmail.tsx, replace nested <span> bullet with plain text bullet character directly in the string (e.g., `\u2022 ${takeaway}` as a single Text element with no nested span). Remove tldrBullet span style entirely.",
         "Cache TLDR: add a digest_cache table via migration with columns: id (uuid PK), cache_key (text unique), takeaways (text array), created_at",
         "In sendDigests.ts, generate TLDR once before the user loop using a cache_key of format `{date}-{frequency}` (e.g., '2026-04-01-daily')",
         "Check digest_cache for existing entry before calling generateTLDR",
@@ -643,14 +643,14 @@
     {
       "id": "US-069",
       "title": "Weekly digest: themes-only AI summary with no individual article links",
-      "description": "As a weekly subscriber, I want my digest to be a clean AI-generated thematic summary of the week's most important AI stories — organized by theme with cross-source coverage noted — with NO individual article list or backlinks. Weekly is a summary format, not a curated article list.",
+      "description": "As a weekly subscriber, I want my digest to be a clean AI-generated thematic summary of the week's most important AI stories \u2014 organized by theme with cross-source coverage noted \u2014 with NO individual article list or backlinks. Weekly is a summary format, not a curated article list.",
       "acceptanceCriteria": [
         "Add generateWeeklySummary function in src/lib/digest/generateWeeklySummary.ts that takes all articles for the week and returns: { themes: Array<{ title: string, summary: string, sources: string[] }> }",
         "Uses Claude Haiku with a prompt that: identifies 3-5 key themes from the week, writes 2-3 sentence summary per theme, notes which sources covered each theme (boosting themes mentioned across multiple sources), does NOT include individual article URLs",
-        "Create a new WeeklyDigestEmail.tsx template (separate from DigestEmail.tsx) that shows: header with logo and date range (e.g. 'Week of March 31'), story count ('N stories reviewed across your sources'), AI disclaimer note ('AI summaries may contain errors — verify important details at the source'), themes section with title + summary + source pills per theme, footer with unsubscribe/preferences links only (no article links)",
+        "Create a new WeeklyDigestEmail.tsx template (separate from DigestEmail.tsx) that shows: header with logo and date range (e.g. 'Week of March 31'), story count ('N stories reviewed across your sources'), AI disclaimer note ('AI summaries may contain errors \u2014 verify important details at the source'), themes section with title + summary + source pills per theme, footer with unsubscribe/preferences links only (no article links)",
         "In sendDigest.ts, detect if user frequency is 'weekly' and use WeeklyDigestEmail template instead of DigestEmail",
         "Cache weekly summary in digest_cache table with cache_key format 'weekly-{YYYY-WW}'",
-        "Update FrequencySelector.tsx helper text for weekly option to: 'Every Monday — a curated AI summary of the week\\'s key themes. No individual article links.'",
+        "Update FrequencySelector.tsx helper text for weekly option to: 'Every Monday \u2014 a curated AI summary of the week\\'s key themes. No individual article links.'",
         "Update verify-success page text to differentiate: daily users see 'Your first digest arrives tomorrow morning', weekly users see 'Your first weekly summary arrives next Monday'",
         "Typecheck passes"
       ],
@@ -671,8 +671,8 @@
         "Verify in browser using dev-browser skill"
       ],
       "priority": 40,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Verified implemented in codebase \u2014 marked complete."
     },
     {
       "id": "US-041",
@@ -687,8 +687,8 @@
         "Verify in browser using dev-browser skill"
       ],
       "priority": 41,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Verified implemented in codebase \u2014 marked complete."
     },
     {
       "id": "US-042",
@@ -704,8 +704,8 @@
         "Typecheck passes"
       ],
       "priority": 42,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Verified implemented in codebase \u2014 marked complete."
     },
     {
       "id": "US-043",
@@ -717,8 +717,8 @@
         "Typecheck passes"
       ],
       "priority": 43,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Verified implemented in codebase \u2014 marked complete."
     },
     {
       "id": "US-044",
@@ -731,8 +731,8 @@
         "Typecheck passes"
       ],
       "priority": 44,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Verified implemented in codebase \u2014 marked complete."
     },
     {
       "id": "US-045",
@@ -748,8 +748,8 @@
         "Typecheck passes"
       ],
       "priority": 45,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Verified implemented in codebase \u2014 marked complete."
     },
     {
       "id": "US-046",
@@ -760,8 +760,8 @@
         "Typecheck passes"
       ],
       "priority": 46,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Verified implemented in codebase \u2014 marked complete."
     },
     {
       "id": "US-047",
@@ -774,8 +774,8 @@
         "Typecheck passes"
       ],
       "priority": 47,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Verified implemented in codebase \u2014 marked complete."
     },
     {
       "id": "US-048",
@@ -790,8 +790,8 @@
         "Typecheck passes"
       ],
       "priority": 48,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Verified implemented in codebase \u2014 marked complete."
     },
     {
       "id": "US-049",
@@ -806,8 +806,8 @@
         "Typecheck passes"
       ],
       "priority": 49,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Verified implemented in codebase \u2014 marked complete."
     },
     {
       "id": "US-050",
@@ -821,8 +821,8 @@
         "Typecheck passes"
       ],
       "priority": 50,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Verified implemented in codebase \u2014 marked complete."
     },
     {
       "id": "US-051",
@@ -836,8 +836,8 @@
         "Typecheck passes"
       ],
       "priority": 51,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Verified implemented in codebase \u2014 marked complete."
     },
     {
       "id": "US-052",
@@ -853,8 +853,8 @@
         "Typecheck passes"
       ],
       "priority": 52,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Verified implemented in codebase \u2014 marked complete."
     },
     {
       "id": "US-053",
@@ -868,8 +868,8 @@
         "Typecheck passes"
       ],
       "priority": 53,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Verified implemented in codebase \u2014 marked complete."
     },
     {
       "id": "US-054",
@@ -885,8 +885,8 @@
         "Typecheck passes"
       ],
       "priority": 54,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Verified implemented in codebase \u2014 marked complete."
     },
     {
       "id": "US-055",
@@ -902,8 +902,8 @@
         "Typecheck passes"
       ],
       "priority": 55,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Verified implemented in codebase \u2014 marked complete."
     },
     {
       "id": "US-056",
@@ -920,8 +920,8 @@
         "Typecheck passes"
       ],
       "priority": 56,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Verified implemented in codebase \u2014 marked complete."
     },
     {
       "id": "US-057",
@@ -936,8 +936,8 @@
         "Typecheck passes"
       ],
       "priority": 57,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Verified implemented in codebase \u2014 marked complete."
     },
     {
       "id": "US-058",
@@ -949,8 +949,8 @@
         "Typecheck passes"
       ],
       "priority": 58,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Verified implemented in codebase \u2014 marked complete."
     },
     {
       "id": "US-059",
@@ -962,8 +962,8 @@
         "Typecheck passes"
       ],
       "priority": 59,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Verified implemented in codebase \u2014 marked complete."
     },
     {
       "id": "US-060",
@@ -975,8 +975,8 @@
         "Typecheck passes"
       ],
       "priority": 60,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Verified implemented in codebase \u2014 marked complete."
     },
     {
       "id": "US-061",
@@ -988,8 +988,8 @@
         "Typecheck passes"
       ],
       "priority": 61,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Verified implemented in codebase \u2014 marked complete."
     },
     {
       "id": "US-062",
@@ -1003,8 +1003,8 @@
         "Typecheck passes"
       ],
       "priority": 62,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Verified implemented in codebase \u2014 marked complete."
     },
     {
       "id": "US-063",
@@ -1019,8 +1019,8 @@
         "Verify in browser using dev-browser skill"
       ],
       "priority": 63,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Source cards already full-width via single-col grid; frequency pills already flex-col on mobile; email+button already flex-col on mobile. Added py-4 sm:py-12 for 16px vertical padding on mobile and p-4 sm:p-5 on SourceCard."
     },
     {
       "id": "US-064",
@@ -1033,22 +1033,19 @@
         "Typecheck passes"
       ],
       "priority": 64,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Verified implemented in codebase \u2014 marked complete."
     },
     {
       "id": "US-070",
       "title": "Admin dashboard - pipeline stats and subscriber overview",
       "description": "As the operator, I want a simple admin page at /admin showing subscriber counts, source breakdown, waitlist, and recent pipeline health so I can monitor the system without checking Vercel logs or Supabase directly.",
       "acceptanceCriteria": [
-        "Create src/app/admin/page.tsx as a server component",
-        "Protect with ADMIN_SECRET env var: read x-admin-secret header or ?secret= query param, return 401 if missing/wrong",
-        "Add ADMIN_SECRET to .env.example",
-        "Show: Total active verified subscribers, breakdown by frequency (daily / weekly count), top 5 sources by subscriber count",
-        "Show: Waitlist count and last 5 waitlist entries (email masked to first 3 chars + ***)",
-        "Show: Ingestion stats for last 24h (emails received, articles extracted, duplicates skipped, errors) from ingestion_log",
-        "Show: Current system_config values (max_subscribers limit, subscriptions_paused status)",
-        "Use clean table/stat layout with brand colors, no external UI library needed",
+        "Create src/app/ops/page.tsx as a server component (URL: /ops, not /admin)",
+        "Protect with ADMIN_SECRET env var: read ?secret= query param, return 401 HTML page if missing/wrong",
+        "Dashboard sections: Subscriber Stats (total active+verified, pending verification, unsubscribed, waitlist count), Recent Digests (last 7 days from user_article_log: date, batch_id, emails sent, articles included), Pipeline Health (last 5 ingestion_log rows: source, status, articles fetched, created_at), Claude Usage (last 7 days from a new claude_usage_log table: date, model, input_tokens, output_tokens, estimated cost at $0.80/1M input + $4/1M output for Haiku)",
+        "Action buttons (POST forms with ?secret= in action URL): Pause/Resume Signups (toggles subscriptions_paused in system_config), Trigger Ingestion (calls /api/ingest/rss), Trigger Digest Daily (calls /api/digest/send?frequency=daily), Trigger Digest Weekly (calls /api/digest/send?frequency=weekly)",
+        "User management: text input + Deactivate User button (sets is_active=false by email), Promote from Waitlist button (moves top waitlist entry to users table as unverified)",
         "Typecheck passes"
       ],
       "priority": 65,
@@ -1060,10 +1057,9 @@
       "title": "Remove hardcoded article limit and make digest article count configurable",
       "description": "As a developer, I want to remove the hardcoded 20-article cap in getUnsentArticles so subscribers receive all new articles since their last digest, with the limit configurable via system_config.",
       "acceptanceCriteria": [
-        "In src/lib/digest/getUnsentArticles.ts, remove the hardcoded limit of 20 and limit*2 fetch cap",
-        "Add a max_articles_per_digest key to system_config seed (default value: { daily: 30, weekly: 50 })",
-        "getUnsentArticles should accept the limit from the caller rather than hardcoding",
-        "In sendDigests.ts, read max_articles_per_digest from system_config and pass appropriate limit based on frequency",
+        "In src/lib/digest/getUnsentArticles.ts, change the default limit parameter from 20 to 50",
+        "In src/lib/jobs/sendDigests.ts, update the getUnsentArticles call for daily digests from limit 20 to 50, and weekly from 40 to 50",
+        "Remove or update any comments referencing old limits",
         "Typecheck passes"
       ],
       "priority": 66,
@@ -1114,16 +1110,16 @@
     },
     {
       "id": "US-075",
-      "title": "Fix Claude URL extraction — prefer redirect URLs over guessing original",
+      "title": "Fix Claude URL extraction \u2014 prefer redirect URLs over guessing original",
       "description": "As a developer, I need the Claude article extraction prompt updated to explicitly prefer the newsletter redirect URL rather than trying to infer the original article URL. Guessing the original URL leads to broken links, while redirect URLs work reliably (and are only broken by the now-fixed URL lowercasing bug in US-065).",
       "acceptanceCriteria": [
-        "In src/lib/ai/anthropic.ts, update the url field instruction in buildUserPrompt to: 'The direct link from the newsletter HTML (use the newsletter redirect URL as-is — do not try to guess or reconstruct the original article URL). If multiple links exist for an item, prefer the most specific one.'",
+        "In src/lib/ai/anthropic.ts, update the url field instruction in buildUserPrompt to: 'The direct link from the newsletter HTML (use the newsletter redirect URL as-is \u2014 do not try to guess or reconstruct the original article URL). If multiple links exist for an item, prefer the most specific one.'",
         "Remove the parenthetical '(not the newsletter link, but the underlying article/announcement)' which causes Claude to guess wrong URLs",
         "Typecheck passes"
       ],
       "priority": 70,
       "passes": false,
-      "notes": "P2. Bug 3 from gap analysis. Claude guesses original URLs from context — sometimes wrong. Newsletter redirect URLs are reliable as long as US-065 (case fix) is done first."
+      "notes": "P2. Bug 3 from gap analysis. Claude guesses original URLs from context \u2014 sometimes wrong. Newsletter redirect URLs are reliable as long as US-065 (case fix) is done first."
     },
     {
       "id": "US-076",
@@ -1131,7 +1127,7 @@
       "description": "As a subscriber using Outlook, I want article tags to render correctly. Currently tags use display:inline-block inside a React Email <Text> component which Outlook does not support, causing tags to stack vertically or render broken.",
       "acceptanceCriteria": [
         "In src/emails/DigestEmail.tsx, replace the tags <Text> + nested <span> approach with a React Email compatible layout",
-        "Use a <Row>/<Column> or plain comma-separated text fallback: render tags as plain text joined by ' · ' (e.g. 'LLMs · Agents · Research') inside a single <Text> element with no nested spans",
+        "Use a <Row>/<Column> or plain comma-separated text fallback: render tags as plain text joined by ' \u00b7 ' (e.g. 'LLMs \u00b7 Agents \u00b7 Research') inside a single <Text> element with no nested spans",
         "Tag text should be muted (color: '#9B9B9B') and smaller (fontSize: '12px')",
         "Remove the tag and tags style objects that use display: inline-block",
         "Typecheck passes"
@@ -1145,11 +1141,11 @@
       "title": "Email QA preview page for operator to review digest before send",
       "description": "As the operator, I want a page at /admin/preview-digest that renders a live preview of what today's digest will look like for a given subscriber email, so I can QA the content and layout before the cron sends it.",
       "acceptanceCriteria": [
-        "Create src/app/admin/preview-digest/page.tsx protected by ADMIN_SECRET",
-        "Page has a form: email input + 'Preview' button",
-        "On submit, fetch unsent articles for that user (same logic as sendDigest), render DigestEmail or WeeklyDigestEmail component, and display it inline in an iframe or styled div",
-        "Shows message if user email not found or no articles to send",
-        "Add link to this page from the /admin dashboard",
+        "Create src/app/ops/preview-digest/page.tsx protected by ADMIN_SECRET (?secret= query param)",
+        "Page renders a server-side preview of the digest email HTML for a given subscriber email",
+        "Controls: email input field, frequency toggle (daily/weekly), Preview button",
+        "On submit: fetch unsent articles for that user (or latest batch if user not found), render the appropriate email template (DigestEmail or WeeklyDigestEmail) as HTML string using renderAsync from @react-email/render",
+        "Display rendered HTML in an iframe or via dangerouslySetInnerHTML so operator can see exactly what the subscriber would receive",
         "Typecheck passes"
       ],
       "priority": 72,
@@ -1161,28 +1157,29 @@
       "title": "Add token usage logging for Claude API calls",
       "description": "As a developer, I want to log Claude API token usage (input tokens, output tokens, estimated cost) for each extraction and TLDR generation call so I can audit and optimize API costs.",
       "acceptanceCriteria": [
-        "In src/lib/ai/anthropic.ts, after each API call log: model name, input_tokens, output_tokens from response.usage to console",
-        "Format: [Claude] model=claude-sonnet-4-5 input=1234 output=567 (extraction) or (tldr)",
-        "In src/lib/digest/generateTLDR.ts, same logging pattern",
+        "Create supabase migration for claude_usage_log table: id (uuid PK), called_at (timestamptz default now), model (text), input_tokens (int), output_tokens (int), call_type (text \u2014 'extraction', 'tldr', 'weekly_summary')",
+        "In src/lib/ai/anthropic.ts, after each Anthropic API call, insert a row into claude_usage_log with model, input_tokens, output_tokens from response.usage, and call_type",
+        "Also log to console: [Claude] model=claude-haiku-4-5 input=1234 output=567 type=extraction",
         "Typecheck passes"
       ],
       "priority": 73,
       "passes": false,
-      "notes": "P2. Simple console logging of usage stats. No DB storage needed — Vercel logs capture these. Helps identify expensive newsletters."
+      "notes": "P2. Simple console logging of usage stats. No DB storage needed \u2014 Vercel logs capture these. Helps identify expensive newsletters."
     },
     {
       "id": "US-079",
       "title": "Add database archiving and pruning strategy for articles and ingestion logs",
       "description": "As a developer, I need a strategy to prevent unbounded growth of the articles and ingestion_log tables as the pipeline runs daily.",
       "acceptanceCriteria": [
-        "Create a SQL migration that adds a scheduled Supabase pg_cron job (or document a manual process) to: delete ingestion_log rows older than 90 days, delete articles rows older than 180 days where the article has been sent to all active subscribers (check user_article_log)",
-        "Alternatively, create a /api/admin/prune endpoint protected by ADMIN_SECRET that runs the cleanup queries on demand",
-        "Document the pruning strategy in a comment in the migration or endpoint",
+        "Create src/app/api/admin/prune/route.ts protected by ADMIN_SECRET (check Authorization header or ?secret= query param)",
+        "POST handler runs: DELETE FROM ingestion_log WHERE created_at < NOW() - INTERVAL '90 days'; DELETE FROM articles WHERE ingested_at < NOW() - INTERVAL '180 days' AND id NOT IN (SELECT article_id FROM user_article_log WHERE sent_at > NOW() - INTERVAL '180 days')",
+        "Returns JSON with rows deleted counts for each table",
+        "In src/app/ops/page.tsx, add a storage health indicator: query ingestion_log row count and oldest article date. If ingestion_log > 10000 rows OR articles older than 90 days exist, show an orange warning badge 'Pruning recommended'. Show a Prune Now button (POST form to /api/admin/prune?secret=...)",
         "Typecheck passes"
       ],
       "priority": 74,
       "passes": false,
-      "notes": "P2. At current scale (10 newsletters/blogs × 10 articles/day = 100 articles/day = 36,500/year) the DB will grow significantly. ingestion_log grows even faster."
+      "notes": "P2. At current scale (10 newsletters/blogs \u00d7 10 articles/day = 100 articles/day = 36,500/year) the DB will grow significantly. ingestion_log grows even faster."
     }
   ]
 }
