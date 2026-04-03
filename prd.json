@@ -1149,7 +1149,7 @@
         "Typecheck passes"
       ],
       "priority": 72,
-      "passes": false,
+      "passes": true,
       "notes": "P2. Currently no way to QA emails before they go out. Operator must wait for the cron to fire."
     },
     {

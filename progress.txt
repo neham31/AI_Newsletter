@@ -871,3 +871,23 @@ AI News Aggregator & Newsletter Platform - Curated AI news from top newsletters 
   - Use plain text with dot/bullet separators for tag lists: `tags.join(' · ')`
   - Avoid any CSS that relies on inline-block, flexbox, or grid inside React Email text components for Outlook compatibility
 ---
+
+## 2026-04-03 - US-077
+- **Implemented:** Email QA preview page for operator to review digest before send
+- **Files created:**
+  - src/app/ops/preview-digest/page.tsx (server component, ADMIN_SECRET auth via ?secret=)
+  - src/app/ops/preview-digest/PreviewFrame.tsx (client component, renders iframe with srcdoc)
+- **What was done:**
+  - Protected page at /ops/preview-digest using same ADMIN_SECRET pattern as /ops
+  - Form with email input, daily/weekly frequency selector, and Preview button (GET form)
+  - On submit: looks up user by email; if found, calls getUnsentArticles; if not found, falls back to latest 50 articles across all active sources
+  - For daily: renders DigestEmail with renderAsync (render from @react-email/render v2 returns a Promise)
+  - For weekly: builds mock WeeklyTheme[] from grouped articles per source, renders WeeklyDigestEmail
+  - Displays rendered HTML in an iframe via PreviewFrame client component (srcdoc attribute)
+  - Back link to /ops dashboard
+- **Learnings for future iterations:**
+  - @react-email/render v2 exports `render` (not `renderAsync`) — it returns a Promise<string>, so await it
+  - Server components can't use srcdoc directly; use a `'use client'` wrapper component for the iframe
+  - For weekly preview without a real TLDR generation, build mock WeeklyTheme[] from grouped article headlines
+  - GET forms in server components work naturally with searchParams — no client-side JavaScript needed
+---
