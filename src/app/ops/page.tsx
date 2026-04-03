@@ -76,6 +76,7 @@ const s = {
   badgeRed: { display: 'inline-block', padding: '2px 8px', borderRadius: '10px', fontSize: '11px', fontWeight: 600, background: '#ffebee', color: '#c62828' } as React.CSSProperties,
   badgeYellow: { display: 'inline-block', padding: '2px 8px', borderRadius: '10px', fontSize: '11px', fontWeight: 600, background: '#fffde7', color: '#f57f17' } as React.CSSProperties,
   badgeGray: { display: 'inline-block', padding: '2px 8px', borderRadius: '10px', fontSize: '11px', fontWeight: 600, background: '#f5f5f5', color: '#666' } as React.CSSProperties,
+  badgeOrange: { display: 'inline-block', padding: '2px 8px', borderRadius: '10px', fontSize: '11px', fontWeight: 600, background: '#fff3e0', color: '#e65100' } as React.CSSProperties,
   code: { fontSize: '11px', background: '#f0f0f0', padding: '1px 4px', borderRadius: '3px' } as React.CSSProperties,
   muted: { color: '#999' } as React.CSSProperties,
 };
@@ -113,6 +114,8 @@ export default async function OpsPage({ searchParams }: PageProps) {
     pipelineRes,
     claudeRes,
     configRes,
+    ingestionCountRes,
+    oldestArticleRes,
   ] = await Promise.all([
     supabase
       .from('users')
@@ -153,6 +156,15 @@ export default async function OpsPage({ searchParams }: PageProps) {
       .select('key, value')
       .eq('key', 'subscriptions_paused')
       .single(),
+    supabase
+      .from('ingestion_log')
+      .select('*', { count: 'exact', head: true }),
+    supabase
+      .from('articles')
+      .select('ingested_at')
+      .order('ingested_at', { ascending: true })
+      .limit(1)
+      .maybeSingle(),
   ]);
 
   const activeVerified = activeVerifiedRes.count ?? 0;
@@ -193,6 +205,13 @@ export default async function OpsPage({ searchParams }: PageProps) {
     g.output_tokens += row.output_tokens;
   }
   const claudeSummary = Array.from(claudeAgg.values()).sort((a, b) => b.date.localeCompare(a.date));
+
+  const ingestionLogCount = ingestionCountRes.count ?? 0;
+  const oldestArticleDate = (oldestArticleRes.data as { ingested_at: string } | null)?.ingested_at ?? null;
+  const ninetyDaysAgo = new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString();
+  const pruningRecommended =
+    ingestionLogCount > 10000 ||
+    (oldestArticleDate !== null && oldestArticleDate < ninetyDaysAgo);
 
   const signupsPaused = (configRes.data?.value as { paused?: boolean } | null)?.paused === true;
   const baseUrl = `/api/ops?secret=${encodeURIComponent(secret)}`;
@@ -302,6 +321,34 @@ export default async function OpsPage({ searchParams }: PageProps) {
               </tbody>
             </table>
           )}
+        </div>
+
+        {/* Storage Health */}
+        <div style={s.section}>
+          <h2 style={s.h2}>
+            Storage Health
+            {pruningRecommended && <span style={s.badgeOrange}>Pruning recommended</span>}
+          </h2>
+          <div style={s.statsGrid}>
+            <div style={s.stat}>
+              <div style={s.statValue}>{ingestionLogCount.toLocaleString()}</div>
+              <div style={s.statLabel}>ingestion_log rows</div>
+            </div>
+            <div style={s.stat}>
+              <div style={s.statValue}>{oldestArticleDate ? formatDate(oldestArticleDate) : '—'}</div>
+              <div style={s.statLabel}>Oldest article</div>
+            </div>
+          </div>
+          {pruningRecommended && (
+            <p style={{ fontSize: '12px', color: '#999', margin: '12px 0 8px' }}>
+              Pruning removes ingestion_log entries older than 90 days and articles older than 180 days not sent to any user.
+            </p>
+          )}
+          <div style={{ marginTop: '12px' }}>
+            <form method="POST" action={`/api/admin/prune?secret=${encodeURIComponent(secret)}`}>
+              <button type="submit" style={s.btnDanger}>Prune Now</button>
+            </form>
+          </div>
         </div>
 
         {/* Claude Usage */}
