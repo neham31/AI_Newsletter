@@ -110,6 +110,7 @@ export default async function OpsPage({ searchParams }: PageProps) {
     pendingRes,
     unsubscribedRes,
     waitlistRes,
+    subscriberListRes,
     ualRes,
     pipelineRes,
     claudeRes,
@@ -134,6 +135,11 @@ export default async function OpsPage({ searchParams }: PageProps) {
     supabase
       .from('waitlist')
       .select('*', { count: 'exact', head: true }),
+    supabase
+      .from('users')
+      .select('email, email_verified, is_active, frequency, signed_up_at, last_email_sent_at')
+      .order('signed_up_at', { ascending: false })
+      .limit(200),
     supabase
       .from('user_article_log')
       .select('sent_at, digest_batch_id, user_id, article_id')
@@ -171,6 +177,9 @@ export default async function OpsPage({ searchParams }: PageProps) {
   const pending = pendingRes.count ?? 0;
   const unsubscribed = unsubscribedRes.count ?? 0;
   const waitlistCount = waitlistRes.count ?? 0;
+
+  type SubscriberRow = { email: string; email_verified: boolean; is_active: boolean; frequency: string; signed_up_at: string | null; last_email_sent_at: string | null };
+  const subscriberList = (subscriberListRes.data ?? []) as SubscriberRow[];
 
   // Aggregate user_article_log by (date, digest_batch_id)
   const digestAgg = new Map<string, { date: string; batch_id: string | null; users: Set<string>; articles: Set<string> }>();
@@ -257,6 +266,49 @@ export default async function OpsPage({ searchParams }: PageProps) {
               <div style={s.statLabel}>On Waitlist</div>
             </div>
           </div>
+        </div>
+
+        {/* Subscriber List */}
+        <div style={s.section}>
+          <h2 style={s.h2}>All Users ({subscriberList.length})</h2>
+          {subscriberList.length === 0 ? (
+            <p style={s.muted}>No users found.</p>
+          ) : (
+            <div style={{ overflowX: 'auto' }}>
+              <table style={s.table}>
+                <thead>
+                  <tr>
+                    <th style={s.th}>Email</th>
+                    <th style={s.th}>Status</th>
+                    <th style={s.th}>Frequency</th>
+                    <th style={s.th}>Signed Up</th>
+                    <th style={s.th}>Last Email</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {subscriberList.map((user, i) => {
+                    let statusBadgeEl;
+                    if (!user.is_active) {
+                      statusBadgeEl = <span style={s.badgeRed}>Unsubscribed</span>;
+                    } else if (!user.email_verified) {
+                      statusBadgeEl = <span style={s.badgeYellow}>Pending</span>;
+                    } else {
+                      statusBadgeEl = <span style={s.badgeGreen}>Active</span>;
+                    }
+                    return (
+                      <tr key={i}>
+                        <td style={s.td}>{user.email}</td>
+                        <td style={s.td}>{statusBadgeEl}</td>
+                        <td style={s.td}>{user.frequency ?? '—'}</td>
+                        <td style={{ ...s.td, whiteSpace: 'nowrap' }}>{user.signed_up_at ? formatDate(user.signed_up_at) : '—'}</td>
+                        <td style={{ ...s.td, whiteSpace: 'nowrap' }}>{user.last_email_sent_at ? formatDateTime(user.last_email_sent_at) : '—'}</td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          )}
         </div>
 
         {/* Recent Digests */}
